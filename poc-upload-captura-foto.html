@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PoC - Upload/Captura de Foto da Nota Fiscal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f7f7f7;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fff;
+      margin-top: 40px;
+      padding: 24px 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      max-width: 350px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      font-size: 1.3rem;
+      margin-bottom: 18px;
+      color: #333;
+    }
+    input[type="file"] {
+      margin-bottom: 18px;
+    }
+    .preview {
+      width: 100%;
+      max-width: 300px;
+      min-height: 120px;
+      background: #eee;
+      border: 1px dashed #bbb;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .preview img {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
+    @media (max-width: 500px) {
+      .container { max-width: 98vw; padding: 12px 2vw; }
+      .preview { max-width: 95vw; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Upload/Captura de Foto da Nota Fiscal</h1>
+    <input type="file" accept="image/*" capture="environment" id="fileInput">
+    <div class="preview" id="preview">
+      <span>Nenhuma imagem selecionada</span>
+    </div>
+  </div>
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+
+    fileInput.addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      preview.innerHTML = '';
+      if (file && file.type.startsWith('image/')) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.onload = () => URL.revokeObjectURL(img.src);
+        preview.appendChild(img);
+      } else {
+        preview.innerHTML = '<span>Nenhuma imagem selecionada</span>';
+      }
+    });
+  </script>
+</body>
+</html> 
