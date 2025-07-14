@@ -59,7 +59,7 @@
     window.GEMINI_API_KEY = "__GEMINI_API_KEY__";
 
     const isLocal = location.hostname === "localhost" || location.protocol === "file:";
-    if ((!window.GEMINI_API_KEY || window.GEMINI_API_KEY === "__GEMINI_API_KEY__") && isLocal) {
+    if (!window.GEMINI_API_KEY && isLocal) {
       fetch('.env').then(async r => {
         if (r.ok) {
           const txt = await r.text();
@@ -148,7 +148,7 @@
 
     enviarGemini.addEventListener('click', async function() {
       let apiKey = window.GEMINI_API_KEY;
-      if (!apiKey || apiKey === "__GEMINI_API_KEY__") {
+      if (!apiKey) {
         alert('API Key não encontrada!');
         return;
       }
