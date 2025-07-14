@@ -6,7 +6,7 @@
   <title>PoC - Gemini (Google AI) com Imagem Direta</title>
   <style>
     body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-    .container { background: #fff; margin-top: 40px; padding: 24px 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); max-width: 420px; width: 100%; display: flex; flex-direction: column; align-items: center; }
+    .container { background: #fff; margin-top: 40px; padding: 24px 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); max-width: 1200px; width: 100%; display: flex; flex-direction: column; align-items: center; }
     h1 { font-size: 1.1rem; margin-bottom: 18px; color: #333; }
     input[type="file"], input[type="text"] { margin-bottom: 18px; width: 100%; max-width: 350px; }
     .preview { width: 100%; max-width: 300px; min-height: 120px; background: #eee; border: 1px dashed #bbb; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; overflow: hidden; }
@@ -31,7 +31,6 @@
   <div style="margin-bottom: 18px;"><a href="index.html" style="color:#1976d2;font-weight:bold;text-decoration:none;">&larr; Voltar para o início</a></div>
   <div class="container">
     <h1>Gemini (Google AI) - Extração Direta da Imagem</h1>
-    <input type="text" id="apiKey" placeholder="Cole sua Gemini API Key aqui" autocomplete="off">
     <input type="file" accept="image/*" capture="environment" id="fileInput">
     <div class="preview" id="preview"><span>Nenhuma imagem selecionada</span></div>
     <button id="enviarGemini" disabled>Enviar Imagem para Gemini</button>
@@ -55,6 +54,20 @@
       <div class="paginacao" id="paginacao" style="display:none;"></div>
     </div>
   </div>
+  <script>
+   
+    window.GEMINI_API_KEY = "__GEMINI_API_KEY__";
+
+    if (!window.GEMINI_API_KEY || window.GEMINI_API_KEY === "__GEMINI_API_KEY__") {
+      fetch('.env').then(async r => {
+        if (r.ok) {
+          const txt = await r.text();
+          const match = txt.match(/^GEMINI_API_KEY\s*=\s*(.+)$/m);
+          if (match) window.GEMINI_API_KEY = match[1].trim();
+        }
+      });
+    }
+  </script>
   <script>
     const fileInput = document.getElementById('fileInput');
     const preview = document.getElementById('preview');
@@ -133,9 +146,9 @@
     });
 
     enviarGemini.addEventListener('click', async function() {
-      const apiKey = apiKeyInput.value.trim();
-      if (!apiKey) {
-        alert('Informe sua Gemini API Key!');
+      let apiKey = window.GEMINI_API_KEY;
+      if (!apiKey || apiKey === "__GEMINI_API_KEY__") {
+        alert('Informe sua Gemini API Key via .env ou variável de ambiente no deploy!');
         return;
       }
       if (!imagemSelecionada) {
