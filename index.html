@@ -298,27 +298,80 @@
             opacity: 0.5;
         }
 
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2rem;
-            }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
 
-            .nav-tabs {
-                flex-direction: column;
-                gap: 5px;
-            }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
-            .nav-tab {
-                margin: 0;
-            }
+        .success-message {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
+        }
 
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
+        .error-message {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
+        }
 
-            .items-grid {
-                grid-template-columns: 1fr;
-            }
+        .product-info {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .product-info h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .product-info p {
+            margin: 5px 0;
+            font-size: 0.9rem;
+            color: #4a5568;
+        }
+        .header h1 {
+            font-size: 2rem;
+        }
+
+        .nav-tabs {
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .nav-tab {
+            margin: 0;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .items-grid {
+            grid-template-columns: 1fr;
         }
     </style>
 </head>
@@ -373,6 +426,11 @@
                         <select id="produtoMercado" required>
                             <option value="">Selecione um mercado</option>
                         </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="codigoBarras">Código de Barras (GTIN)</label>
+                        <input type="text" id="codigoBarras" placeholder="Digite o código de barras">
+                        <button type="button" id="buscarProduto" class="btn" style="margin-top: 10px; padding: 10px 15px; font-size: 14px;">🔍 Buscar Produto</button>
                     </div>
                     <div class="input-group">
                         <label for="produtoNome">Nome do Produto</label>
@@ -467,6 +525,154 @@
             }
         }
 
+        // Buscar produto por código de barras
+        document.getElementById('buscarProduto').addEventListener('click', async function() {
+            const codigoBarras = document.getElementById('codigoBarras').value.trim();
+            
+            if (!codigoBarras) {
+                showMessage('Por favor, digite um código de barras.', 'error');
+                return;
+            }
+            
+            // Validar formato GTIN (8, 12, 13, 14 dígitos)
+            if (!/^\d{8}$|^\d{12}$|^\d{13}$|^\d{14}$/.test(codigoBarras)) {
+                showMessage('Código de barras deve ter 8, 12, 13 ou 14 dígitos.', 'error');
+                return;
+            }
+            
+            //showMessage('', 'loading');
+            
+            try {
+                // Buscar na API Cosmos Bluesoft
+                const response = await fetch(`https://api.cosmos.bluesoft.com.br/gtins/${codigoBarras}.json`,{
+                    method: 'GET',
+                    headers: {
+                        'X-Cosmos-Token': 'yHx9MvzxengJufGB7BgNzQ',
+                        'Content-Type': 'application/json',
+                        'User-Agent': 'Cosmos-API-Request'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Erro na API: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data && data.description) {
+                    // Preencher os campos automaticamente
+                    document.getElementById('produtoNome').value = data.description;
+                    
+                    // Tentar determinar a categoria baseada na descrição
+                    const categoria = determinarCategoria(data.description);
+                    if (categoria) {
+                        document.getElementById('produtoCategoria').value = categoria;
+                    }
+                    
+                    // Tentar determinar a unidade baseada na descrição
+                    const unidade = determinarUnidade(data.description);
+                    if (unidade) {
+                        document.getElementById('produtoUnidade').value = unidade;
+                    }
+                    
+                    // Mostrar informações do produto
+                    showProductInfo(data);
+                    showMessage('Produto encontrado e campos preenchidos automaticamente!', 'success');
+                } else {
+                    showMessage('Produto não encontrado na base de dados.', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao buscar produto:', error);
+                showMessage('Erro ao buscar produto. Tente novamente ou preencha manualmente.', 'error');
+            }
+        });
+
+        // Função para mostrar mensagens
+        function showMessage(message, type) {
+            const loadingEl = document.getElementById('loadingMessage');
+            const successEl = document.getElementById('successMessage');
+            const errorEl = document.getElementById('errorMessage');
+            
+            // Ocultar todas as mensagens
+            if(loadingEl){
+                loadingEl.style.display = 'none';
+            }
+
+            if(successEl){
+                successEl.style.display = 'none';
+            }
+
+            if(errorEl) {
+                errorEl.style.display = 'none';
+            }
+            
+            if (type === 'loading') {
+                loadingEl.style.display = 'block';
+            } else if (type === 'success' && message) {
+                successEl.textContent = message;
+                successEl.style.display = 'block';
+                setTimeout(() => successEl.style.display = 'none', 5000);
+            } else if (type === 'error' && message) {
+                errorEl.textContent = message;
+                errorEl.style.display = 'block';
+                setTimeout(() => errorEl.style.display = 'none', 5000);
+            }
+        }
+        
+        // Função para mostrar informações do produto
+        function showProductInfo(data) {
+            const infoEl = document.getElementById('productInfo');
+            let infoHtml = '<h4>📦 Informações do Produto:</h4>';
+            
+            if (data.description) infoHtml += `<p><strong>Nome:</strong> ${data.description}</p>`;
+            if (data.brand) infoHtml += `<p><strong>Marca:</strong> ${data.brand}</p>`;
+            if (data.gtin) infoHtml += `<p><strong>GTIN:</strong> ${data.gtin}</p>`;
+            if (data.ncm) infoHtml += `<p><strong>NCM:</strong> ${data.ncm}</p>`;
+            if (data.origin) infoHtml += `<p><strong>Origem:</strong> ${data.origin}</p>`;
+            
+            infoEl.innerHTML = infoHtml;
+            infoEl.style.display = 'block';
+            setTimeout(() => infoEl.style.display = 'none', 10000);
+        }
+        
+        // Função para determinar categoria baseada na descrição
+        function determinarCategoria(descricao) {
+            const desc = descricao.toLowerCase();
+            
+            const categorias = {
+                'Bebidas': ['refrigerante', 'suco', 'água', 'cerveja', 'bebida', 'coca', 'pepsi', 'guaraná', 'soda'],
+                'Laticínios': ['leite', 'queijo', 'iogurte', 'manteiga', 'requeijão', 'creme de leite', 'nata'],
+                'Carnes': ['carne', 'frango', 'peixe', 'linguiça', 'salsicha', 'presunto', 'mortadela', 'bacon'],
+                'Cereais': ['arroz', 'feijão', 'macarrão', 'pão', 'biscoito', 'cereal', 'aveia', 'granola'],
+                'Higiene': ['sabonete', 'shampoo', 'pasta de dente', 'desodorante', 'perfume', 'creme'],
+                'Limpeza': ['detergente', 'sabão', 'amaciante', 'desinfetante', 'álcool', 'água sanitária'],
+                'Frutas': ['maçã', 'banana', 'laranja', 'uva', 'mamão', 'abacaxi', 'manga', 'fruta'],
+                'Verduras': ['alface', 'tomate', 'cebola', 'batata', 'cenoura', 'verdura', 'legume']
+            };
+            
+            for (const [categoria, palavras] of Object.entries(categorias)) {
+                if (palavras.some(palavra => desc.includes(palavra))) {
+                    return categoria;
+                }
+            }
+            
+            return null;
+        }
+        
+        // Função para determinar unidade baseada na descrição
+        function determinarUnidade(descricao) {
+            const desc = descricao.toLowerCase();
+            
+            if (desc.includes('kg') || desc.includes('kilo')) return 'kg';
+            if (desc.includes('g') && !desc.includes('kg')) return 'g';
+            if (desc.includes('l') || desc.includes('litro')) return 'l';
+            if (desc.includes('ml')) return 'ml';
+            if (desc.includes('cx') || desc.includes('caixa')) return 'cx';
+            if (desc.includes('pct') || desc.includes('pacote')) return 'pct';
+            
+            return 'un'; // padrão
+        }
+
         // Cadastro de mercado
         document.getElementById('mercadoForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -507,7 +713,8 @@
                 nome: nome,
                 unidade: unidade,
                 valor: valor,
-                categoria: categoria
+                categoria: categoria,
+                gtin: document.getElementById('codigoBarras').value || null
             };
             
             produtos.push(produto);
@@ -578,6 +785,7 @@
                         <h3>${produto.nome}</h3>
                         <p><strong>Mercado:</strong> ${mercado ? mercado.nome : 'N/A'}</p>
                         <p><strong>Unidade:</strong> ${produto.unidade}</p>
+                        ${produto.gtin ? `<p><strong>GTIN:</strong> ${produto.gtin}</p>` : ''}
                         <div class="price-tag">R$ ${produto.valor.toFixed(2)}</div>
                         <div class="category-badge">${produto.categoria}</div>
                     </div>
