@@ -469,8 +469,13 @@
                         </select>
                     </div>
                 </div>
+
                 <button type="submit" class="btn">Cadastrar Produto</button>
             </form>
+            <div id="loadingMessage" class="loading" style="display:none;"></div>
+            <div id="successMessage" class="success-message"></div>
+            <div id="errorMessage" class="error-message"></div>
+            <div id="productInfo" class="product-info"></div>
 
             <div class="items-grid" id="produtosList">
                 <div class="empty-state">
@@ -557,9 +562,16 @@
                     throw new Error(`Erro na API: ${response.status}`);
                 }
                 
-                const data = await response.json();
-                
-                if (data && data.description) {
+                const result = await response.json();
+                const data = {
+                    description: result.description,
+                    gtin: result.gtin,
+                    origin: result.origin,
+                    brand: result.brand && result.brand.name ? result.brand.name : undefined,
+                    ncm: result.ncm && result.ncm.code ? result.ncm.code : undefined
+                };
+
+                if (data.description) {
                     // Preencher os campos automaticamente
                     document.getElementById('produtoNome').value = data.description;
                     
@@ -622,17 +634,18 @@
         // Função para mostrar informações do produto
         function showProductInfo(data) {
             const infoEl = document.getElementById('productInfo');
+            if (!infoEl) return;
             let infoHtml = '<h4>📦 Informações do Produto:</h4>';
-            
+
             if (data.description) infoHtml += `<p><strong>Nome:</strong> ${data.description}</p>`;
             if (data.brand) infoHtml += `<p><strong>Marca:</strong> ${data.brand}</p>`;
             if (data.gtin) infoHtml += `<p><strong>GTIN:</strong> ${data.gtin}</p>`;
             if (data.ncm) infoHtml += `<p><strong>NCM:</strong> ${data.ncm}</p>`;
             if (data.origin) infoHtml += `<p><strong>Origem:</strong> ${data.origin}</p>`;
-            
+
             infoEl.innerHTML = infoHtml;
             infoEl.style.display = 'block';
-            setTimeout(() => infoEl.style.display = 'none', 10000);
+            setTimeout(() => (infoEl.style.display = 'none'), 10000);
         }
         
         // Função para determinar categoria baseada na descrição
