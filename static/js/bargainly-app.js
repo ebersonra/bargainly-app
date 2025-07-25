@@ -78,6 +78,9 @@ document.getElementById('buscarProduto').addEventListener('click', async functio
         const thumbnail = data.thumbnail;
         document.getElementById('thumbnail').src = thumbnail;
 
+        const barcode_image = data.barcode_image;
+        document.getElementById('barcode').src = barcode_image;
+
         // Tentar determinar a categoria
         const category = data.category;
         if (category && !verificaCategoria(category)) {
@@ -305,7 +308,10 @@ document.getElementById('produtoForm').addEventListener('submit', function(e) {
     const unidade = document.getElementById('produtoUnidade').value;
     const valor = parseFloat(document.getElementById('produtoValor').value);
     const categoria = document.getElementById('produtoCategoria').value;
-    
+    const thumbnail = document.getElementById('thumbnail').src;
+    const gtin = document.getElementById('codigoBarras').value || null;
+    const barcode = document.getElementById('barcode').src;
+
     const produto = {
         id: nextProdutoId++,
         mercadoId: mercadoId,
@@ -313,7 +319,9 @@ document.getElementById('produtoForm').addEventListener('submit', function(e) {
         unidade: unidade,
         valor: valor,
         categoria: categoria,
-        gtin: document.getElementById('codigoBarras').value || null
+        gtin: gtin,
+        thumbnail: thumbnail,
+        barcode: barcode
     };
     
     produtos.push(produto);
@@ -381,12 +389,18 @@ function updateProdutosList() {
         const mercado = mercados.find(m => m.id === produto.mercadoId);
         return `
             <div class="item-card">
+                <div class="product-container">
+                    <img id="thumbnail" class="product-thumbnail-list" src="${produto.thumbnail}" alt="Produto">
+                </div>
                 <h3>${produto.nome}</h3>
                 <p><strong>Mercado:</strong> ${mercado ? mercado.nome : 'N/A'}</p>
                 <p><strong>Unidade:</strong> ${produto.unidade}</p>
                 ${produto.gtin ? `<p><strong>GTIN:</strong> ${produto.gtin}</p>` : ''}
                 <div class="price-tag">R$ ${produto.valor.toFixed(2)}</div>
                 <div class="category-badge">${produto.categoria}</div>
+                <div class="product-container">
+                    <img id="barcode" class="product-barcode-list" src="${produto.barcode}" alt="Barcode">
+                </div>
             </div>
         `;
     }).join('');
