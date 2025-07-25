@@ -276,7 +276,7 @@ function determinarUnidade(unidade) {
 }
 
 // Cadastro de mercado
-document.getElementById('mercadoForm').addEventListener('submit', function(e) {
+document.getElementById('mercadoForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const nome = document.getElementById('mercadoNome').value;
@@ -291,6 +291,17 @@ document.getElementById('mercadoForm').addEventListener('submit', function(e) {
     mercados.push(mercado);
     updateMercadosList();
     updateMercadoSelect();
+
+    // Envia para Supabase via função serverless
+    try {
+        await fetch('/.netlify/functions/create-markets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nome, endereco })
+        });
+    } catch (err) {
+        console.error('Erro ao salvar mercado no Supabase', err);
+    }
     
     // Limpar formulário
     this.reset();
@@ -300,7 +311,7 @@ document.getElementById('mercadoForm').addEventListener('submit', function(e) {
 });
 
 // Cadastro de produto
-document.getElementById('produtoForm').addEventListener('submit', function(e) {
+document.getElementById('produtoForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const mercadoId = parseInt(document.getElementById('produtoMercado').value);
@@ -326,6 +337,26 @@ document.getElementById('produtoForm').addEventListener('submit', function(e) {
     
     produtos.push(produto);
     updateProdutosList();
+
+    // Envia para Supabase via função serverless
+    try {
+        await fetch('/.netlify/functions/create-products', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                mercadoId,
+                nome,
+                unidade,
+                valor,
+                categoria,
+                gtin,
+                thumbnail,
+                barcode
+            })
+        });
+    } catch (err) {
+        console.error('Erro ao salvar produto no Supabase', err);
+    }
     
     // Limpar formulário
     this.reset();
