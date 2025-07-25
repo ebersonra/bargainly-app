@@ -79,6 +79,10 @@ document.getElementById('buscarProduto').addEventListener('click', async functio
         document.getElementById('thumbnail').src = thumbnail;
 
         const barcode_image = data.barcode_image;
+        if(!barcode_image){
+            barcode_image = 'static/img/products/prod_ind_v4.webp';
+            data.barcode_image = barcode_image;
+        }
         document.getElementById('barcode').src = barcode_image;
 
         // Tentar determinar a categoria
