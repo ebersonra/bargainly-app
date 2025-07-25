@@ -1,0 +1,50 @@
+{
+    "description": "IOGURTE SEMIDESNATADO MORANGO ZERO LACTOSE PARMALAT FIT COPO 120G",
+    "gtin": 7891097107214,
+    "thumbnail": "https://cdn-cosmos.bluesoft.com.br/products/7891097107214",
+    "width": null,
+    "height": null,
+    "length": null,
+    "net_weight": null,
+    "gross_weight": null,
+    "created_at": "2025-01-18T01:02:41.000-03:00",
+    "updated_at": "2025-07-23T22:28:05.000-03:00",
+    "release_date": null,
+    "price": null,
+    "avg_price": null,
+    "max_price": 0.0,
+    "min_price": 0.0,
+    "gtins": [
+        {
+            "gtin": 7891097107214,
+            "commercial_unit": {
+                "type_packaging": "Unidade",
+                "quantity_packaging": 1,
+                "ballast": null,
+                "layer": null
+            }
+        },
+        {
+            "gtin": 17891097107211,
+            "commercial_unit": {
+                "type_packaging": "Caixa",
+                "quantity_packaging": 24,
+                "ballast": 10,
+                "layer": 23
+            }
+        }
+    ],
+    "origin": "COSMOS",
+    "barcode_image": "https://api.cosmos.bluesoft.com.br/products/barcode/B9D91359B276D48D1CAC46164BDBD073.png",
+    "ncm": {
+        "code": "04032000",
+        "description": "- Iogurte",
+        "full_description": "Leite e laticínios; ovos de aves; mel natural; produtos comestíveis de origem animal, não especificados nem compreendidos em outros Capítulos - Leitelho, leite e creme de leite coalhados, iogurte, quefir e outros leites e cremes de leite fermentados ou acidificados, mesmo concentrados ou adicionados de açúcar ou de outros edulcorantes, ou aromatizados ou adicionados de frutas ou de cacau - - Iogurte",
+        "ex": null
+    },
+    "category": {
+        "id": 60,
+        "description": "Iogurte",
+        "parent_id": 58
+    }
+}
