@@ -25,14 +25,14 @@ exports.handler = async function(event) {
     const url = `${process.env.SUPABASE_URL}/rest/v1/products`;
     const body = JSON.stringify([
       {
-        mercado_id: mercadoId,
-        nome,
-        unidade,
-        valor,
-        categoria,
-        gtin,
-        thumbnail,
-        barcode
+        market_id: mercadoId,
+        name: nome,
+        unit: unidade,
+        price: valor,
+        category: categoria,
+        gtin: gtin,
+        thumbnail: thumbnail,
+        barcode: barcode
       }
     ]);
 

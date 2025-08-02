@@ -285,16 +285,6 @@ document.getElementById('mercadoForm').addEventListener('submit', async function
     
     const nome = document.getElementById('mercadoNome').value;
     const endereco = document.getElementById('mercadoEndereco').value;
-    
-    const mercado = {
-        id: nextMercadoId++,
-        nome: nome,
-        endereco: endereco
-    };
-    
-    mercados.push(mercado);
-    updateMercadosList();
-    updateMercadoSelect();
 
     // Envia para Supabase via função serverless
     try {
@@ -306,6 +296,9 @@ document.getElementById('mercadoForm').addEventListener('submit', async function
     } catch (err) {
         console.error('Erro ao salvar mercado no Supabase', err);
     }
+
+    updateMercadosList();
+    updateMercadoSelect();
     
     // Limpar formulário
     this.reset();
@@ -318,7 +311,7 @@ document.getElementById('mercadoForm').addEventListener('submit', async function
 document.getElementById('produtoForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
-    const mercadoId = parseInt(document.getElementById('produtoMercado').value);
+    const mercadoId = document.getElementById('produtoMercado').value;
     const nome = document.getElementById('produtoNome').value;
     const unidade = document.getElementById('produtoUnidade').value;
     const valor = parseFloat(document.getElementById('produtoValor').value);
@@ -327,20 +320,10 @@ document.getElementById('produtoForm').addEventListener('submit', async function
     const gtin = document.getElementById('codigoBarras').value || null;
     const barcode = document.getElementById('barcode').src;
 
-    const produto = {
-        id: nextProdutoId++,
-        mercadoId: mercadoId,
-        nome: nome,
-        unidade: unidade,
-        valor: valor,
-        categoria: categoria,
-        gtin: gtin,
-        thumbnail: thumbnail,
-        barcode: barcode
-    };
-    
-    produtos.push(produto);
-    updateProdutosList();
+    if(!mercadoId){
+        showNotification('Por favor, selecione um mercado.', 'error');
+        return;
+    }
 
     // Envia para Supabase via função serverless
     try {
@@ -367,12 +350,43 @@ document.getElementById('produtoForm').addEventListener('submit', async function
     
     // Feedback visual
     showNotification('Produto cadastrado com sucesso!', 'success');
+
+    updateProdutosList();
 });
 
 // Atualizar lista de mercados
-function updateMercadosList() {
+async function updateMercadosList() {
     const container = document.getElementById('mercadosList');
+
+    const response = await fetch('/.netlify/functions/get-markets', {
+        method: 'GET',
+        headers: { 
+            'Content-Type': 'application/json'
+        }
+    });
+
+    if (!response.ok) {
+        console.error('Erro ao buscar mercados:', response.statusText);
+    }
+    const result = await response.json();
+
+    if(!result){
+        showMessage('Erro ao buscar mercados na base de dados.', 'error');
+        return;
+    }
+
     
+    result.map(market => {
+        if (!mercados.some(m => m.id === market.id)){
+            // Adiciona mercado ao array
+            mercados.push({
+                id: market.id,
+                nome: market.name,
+                endereco: market.address
+            });
+        }
+    });
+
     if (mercados.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
@@ -394,18 +408,54 @@ function updateMercadosList() {
             <div class="category-badge">Mercado</div>
         </div>
     `).join('');
+
+    updateMercadoSelect();
 }
 
 // Atualizar select de mercados
 function updateMercadoSelect() {
     const select = document.getElementById('produtoMercado');
     select.innerHTML = '<option value="">Selecione um mercado</option>' +
-        mercados.map(mercado => `<option value="${mercado.id}">${mercado.nome}</option>`).join('');
+        mercados.map(mercado => `<option value="${mercado.id}">${mercado.nome} / ${mercado.endereco}</option>`).join('');
 }
 
 // Atualizar lista de produtos
-function updateProdutosList() {
+async function updateProdutosList() {
     const container = document.getElementById('produtosList');
+
+    const response = await fetch('/.netlify/functions/get-products', {
+        method: 'GET',
+        headers: { 
+            'Content-Type': 'application/json'
+        }
+    });
+
+    if (!response.ok) {
+        console.error('Erro ao buscar produtos:', response.statusText);
+    }
+    const result = await response.json();
+
+    if(!result){
+        showMessage('Erro ao buscar produtos na base de dados.', 'error');
+        return;
+    }
+
+    result.map(product => {
+        if (!produtos.some(p => p.id === product.id)){
+            // Adiciona produto ao array
+            produtos.push({
+                id: product.id,
+                mercadoId: product.market_id,
+                nome: product.name,
+                unidade: product.unit,
+                valor: product.price,
+                categoria: product.category,
+                gtin: product.gtin || null,
+                thumbnail: product.thumbnail || 'static/img/products/prod_ind_v4.webp',
+                barcode: product.barcode || 'static/img/products/prod_ind_v4.webp'
+            });
+        }
+    })
     
     if (produtos.length === 0) {
         container.innerHTML = `
@@ -439,6 +489,9 @@ function updateProdutosList() {
             </div>
         `;
     }).join('');
+
+    // Atualizar barganha após carregar produtos
+    updateBarganha();
 }
 
 // Atualizar barganha
@@ -541,4 +594,3 @@ function showNotification(message, type) {
 // Inicialização
 updateMercadosList();
 updateProdutosList();
-updateMercadoSelect();

@@ -17,7 +17,7 @@ exports.handler = async function(event) {
     }
 
     const url = `${process.env.SUPABASE_URL}/rest/v1/markets`;
-    const body = JSON.stringify([{ nome, endereco }]);
+    const body = JSON.stringify([{ name: nome, address: endereco }]);
 
     const response = await fetch(url, {
       method: 'POST',
