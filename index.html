@@ -25,8 +25,17 @@
             <form id="mercadoForm">
                 <div class="form-grid">
                     <div class="input-group">
-                        <label for="mercadoNome">Nome do Mercado</label>
+                        <label for="mercadoCNPJ">CNPJ</label>
+                        <input type="text" id="mercadoCNPJ" placeholder="Digite o CNPJ" required>
+                        <button type="button" id="buscarMercado" class="btn" style="margin-top: 10px; padding: 10px 15px; font-size: 14px;">🔍 Buscar Mercado</button>
+                    </div>
+                    <div class="input-group">
+                        <label for="mercadoNome">Razão Social</label>
                         <input type="text" id="mercadoNome" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="nomeFantasia">Nome fantasia</label>
+                        <input type="text" id="nomeFantasia" required>
                     </div>
                     <div class="input-group">
                         <label for="mercadoEndereco">Endereço</label>
@@ -61,11 +70,13 @@
                     <div class="product-container">
                         <img id="thumbnail" class="product-thumbnail" src="static/img/products/prod_ind_v1.webp" alt="Produto">
                     </div>
-                      
+                    
                     <div class="input-group">
                         <label for="codigoBarras">Código de Barras (GTIN)</label>
                         <input type="text" id="codigoBarras" placeholder="Digite o código de barras">
                         <button type="button" id="buscarProduto" class="btn" style="margin-top: 10px; padding: 10px 15px; font-size: 14px;">🔍 Buscar Produto</button>
+                        <button type="button" id="abrirCamera" class="btn" style="margin-top: 10px; padding: 10px 15px; font-size: 14px;">📷 Ler Código</button>
+                        <video id="cameraFeed" style="display: none; width: 100%; margin-top: 10px;" autoplay></video>
                     </div>
                     <div class="input-group">
                         <label for="produtoNome">Nome do Produto</label>

@@ -1,8 +1,6 @@
 // Armazenamento de dados
 let mercados = [];
 let produtos = [];
-let nextMercadoId = 1;
-let nextProdutoId = 1;
 
 // Navegação entre tabs
 function showTab(tabName) {
@@ -20,6 +18,95 @@ function showTab(tabName) {
         updateBarganha();
     }
 }
+
+document.getElementById('buscarMercado').addEventListener('click', async function() {
+    const mercadoCNPJ = document.getElementById('mercadoCNPJ').value.trim();
+
+    if (!mercadoCNPJ) {
+        showMessage('Por favor, digite um CNPJ.', 'error');
+        return;
+    }
+
+    // Validar formato CNPJ
+    if (!/^\d{14}$/.test(mercadoCNPJ)) {
+        showMessage('CNPJ deve ter 14 dígitos.', 'error');
+        return;
+    }
+
+    showMessage('', 'loading');
+
+    try {
+        // Buscar na API ReceitaWS
+        const endpoint = `/.netlify/functions/get-company-cnpj?cnpj=${mercadoCNPJ}`;
+
+        const response = await fetch(endpoint, {
+            method: 'GET',
+            headers: { 
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Erro ao buscar mercado');
+        }
+
+        const result = await response.json();
+
+        if (!result || result.situacao_cadastral !== 2) {
+            showMessage('Mercado não encontrado ou CNPJ inválido.', 'error');
+            return;
+        }
+
+        // Preencher campos automaticamente
+        document.getElementById('mercadoNome').value = result.razao_social;
+        document.getElementById('nomeFantasia').value = result.nome_fantasia;
+        document.getElementById('mercadoEndereco').value = result.descricao_tipo_de_logradouro + ', ' + result.logradouro + ', ' + result.numero + ', ' + result.bairro + ', ' + result.municipio + ', ' + result.uf;
+
+        showMessage('Mercado encontrado e campos preenchidos automaticamente!', 'success');
+    } catch (error) {
+        console.error('Erro ao buscar mercado:', error);
+        showMessage('Erro ao buscar mercado. Tente novamente.', 'error');
+    }
+});
+
+document.getElementById('abrirCamera').addEventListener('click', async () => {
+    const video = document.getElementById('cameraFeed');
+    video.style.display = 'block';
+
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        video.srcObject = stream;
+
+        // Use QuaggaJS or ZXing here for barcode scanning
+        // Example with QuaggaJS:
+        Quagga.init({
+            inputStream: {
+                name: "Live",
+                type: "LiveStream",
+                target: video
+            },
+            decoder: {
+                readers: ["ean_reader", "code_128_reader"] // Add barcode formats as needed
+            }
+        }, function(err) {
+            if (err) {
+                console.error(err);
+                showMessage('Erro ao iniciar a câmera.', 'error');
+                return;
+            }
+            Quagga.start();
+        });
+
+        Quagga.onDetected(data => {
+            document.getElementById('codigoBarras').value = data.codeResult.code;
+            video.style.display = 'none';
+            Quagga.stop();
+        });
+    } catch (error) {
+        console.error('Erro ao acessar a câmera:', error);
+        showMessage('Erro ao acessar a câmera. Verifique as permissões.', 'error');
+    }
+});
 
 // Buscar produto por código de barras
 document.getElementById('buscarProduto').addEventListener('click', async function() {
@@ -68,8 +155,20 @@ document.getElementById('buscarProduto').addEventListener('click', async functio
             type_packaging: gtin ? gtin.type_packaging : 'un',
             thumbnail: result.thumbnail,
             barcode_image: result.barcode_image,
-            category: result.category ? result.category : {description: 'Outros'}
+            category: result.category ? result.category : {description: 'Outros'},
+            price: result.price ? parseFloat(result.price) : undefined,
+            avg_price: result.avg_price ? parseFloat(result.avg_price) : undefined,
+            max_price: result.max_price ? parseFloat(result.max_price) : undefined,
+            min_price: result.min_price ? parseFloat(result.min_price) : undefined
         };
+
+        const produtoValor = parseFloat(0.01).toFixed(2);
+        if(data.price){
+            produtoValor = parseFloat(data.price).toFixed(2);
+        }else if(data.avg_price){
+            produtoValor = parseFloat(data.avg_price).toFixed(2);
+        }
+        document.getElementById('produtoValor').value =  produtoValor;
 
         // Tentar determinar a unidade baseada na type_packaging
         const unidade = determinarUnidade(data.type_packaging);
@@ -285,13 +384,14 @@ document.getElementById('mercadoForm').addEventListener('submit', async function
     
     const nome = document.getElementById('mercadoNome').value;
     const endereco = document.getElementById('mercadoEndereco').value;
+    const cnpj = document.getElementById('mercadoCNPJ').value;
 
     // Envia para Supabase via função serverless
     try {
         await fetch('/.netlify/functions/create-markets', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nome, endereco })
+            body: JSON.stringify({ nome, endereco, cnpj })
         });
     } catch (err) {
         console.error('Erro ao salvar mercado no Supabase', err);
@@ -374,7 +474,6 @@ async function updateMercadosList() {
         showMessage('Erro ao buscar mercados na base de dados.', 'error');
         return;
     }
-
     
     result.map(market => {
         if (!mercados.some(m => m.id === market.id)){
@@ -382,7 +481,8 @@ async function updateMercadosList() {
             mercados.push({
                 id: market.id,
                 nome: market.name,
-                endereco: market.address
+                endereco: market.address,
+                cnpj: market.cnpj || null
             });
         }
     });
@@ -405,6 +505,7 @@ async function updateMercadosList() {
             <h3>${mercado.nome}</h3>
             <p><strong>ID:</strong> ${mercado.id}</p>
             <p><strong>Endereço:</strong> ${mercado.endereco}</p>
+            <p><strong>CNPJ:</strong> ${mercado.cnpj || 'N/A'}</p>
             <div class="category-badge">Mercado</div>
         </div>
     `).join('');
