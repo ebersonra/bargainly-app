@@ -62,6 +62,13 @@
             <form id="produtoForm">
                 <div class="form-grid">
                     <div class="input-group">
+                        <div id="cameraContainer"></div>
+                        <label for="codigoBarras">Código de Barras (GTIN)</label>
+                        <input type="text" id="codigoBarras" placeholder="Digite o código de barras">
+                        <button type="button" id="buscarProduto" class="btn" style="margin-top: 10px; padding: 10px 15px; font-size: 14px;">🔍 Buscar Produto</button>
+                        <button type="button" id="abrirCamera" class="btn" style="margin-top: 10px; padding: 10px 15px; font-size: 14px;">📷 Ler Código</button>     
+                    </div>
+                    <div class="input-group">
                         <label for="produtoMercado">Mercado</label>
                         <select id="produtoMercado" required>
                             <option value="">Selecione um mercado</option>
@@ -71,13 +78,6 @@
                         <img id="thumbnail" class="product-thumbnail" src="static/img/products/prod_ind_v1.webp" alt="Produto">
                     </div>
                     
-                    <div class="input-group">
-                        <label for="codigoBarras">Código de Barras (GTIN)</label>
-                        <input type="text" id="codigoBarras" placeholder="Digite o código de barras">
-                        <button type="button" id="buscarProduto" class="btn" style="margin-top: 10px; padding: 10px 15px; font-size: 14px;">🔍 Buscar Produto</button>
-                        <button type="button" id="abrirCamera" class="btn" style="margin-top: 10px; padding: 10px 15px; font-size: 14px;">📷 Ler Código</button>
-                        <video id="cameraFeed" style="display: none; width: 100%; margin-top: 10px;" autoplay></video>
-                    </div>
                     <div class="input-group">
                         <label for="produtoNome">Nome do Produto</label>
                         <input type="text" id="produtoNome" required>
@@ -144,6 +144,11 @@
         </div>
     </div>
 
+    <!-- index.html -->
+    <script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.min.js"></script>
     <script src="/static/js/bargainly-app.js"></script>
+    <script src="/static/js/products-app.js"></script>
+    <script src="/static/js/barcode-scanner.js"></script>
+    
 </body>
 </html>

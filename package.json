@@ -2,8 +2,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.53.0",
     "dotenv": "^17.2.0",
-    "node-fetch": "^3.3.2",
-    "quagga": "^0.12.1"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "netlify-cli": "^22.2.2"
