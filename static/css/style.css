@@ -472,4 +472,24 @@ body {
         max-width: 60px;
     }
 }
-  
+
+#cameraContainer {
+  position: relative;
+  width: 300px;
+  height: 200px;
+  overflow: hidden;
+  border: 2px solid #444;
+  border-radius: 8px;
+}
+
+/* Estilo para o <video> e <canvas> gerados dinamicamente */
+#cameraContainer video,
+#cameraContainer canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  z-index: 1;
+}

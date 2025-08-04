@@ -69,45 +69,6 @@ document.getElementById('buscarMercado').addEventListener('click', async functio
     }
 });
 
-document.getElementById('abrirCamera').addEventListener('click', async () => {
-    const video = document.getElementById('cameraFeed');
-    video.style.display = 'block';
-
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        video.srcObject = stream;
-
-        // Use QuaggaJS or ZXing here for barcode scanning
-        // Example with QuaggaJS:
-        Quagga.init({
-            inputStream: {
-                name: "Live",
-                type: "LiveStream",
-                target: video
-            },
-            decoder: {
-                readers: ["ean_reader", "code_128_reader"] // Add barcode formats as needed
-            }
-        }, function(err) {
-            if (err) {
-                console.error(err);
-                showMessage('Erro ao iniciar a câmera.', 'error');
-                return;
-            }
-            Quagga.start();
-        });
-
-        Quagga.onDetected(data => {
-            document.getElementById('codigoBarras').value = data.codeResult.code;
-            video.style.display = 'none';
-            Quagga.stop();
-        });
-    } catch (error) {
-        console.error('Erro ao acessar a câmera:', error);
-        showMessage('Erro ao acessar a câmera. Verifique as permissões.', 'error');
-    }
-});
-
 // Buscar produto por código de barras
 document.getElementById('buscarProduto').addEventListener('click', async function() {
     const codigoBarras = document.getElementById('codigoBarras').value.trim();
