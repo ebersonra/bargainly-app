@@ -85,22 +85,24 @@ async function updateMercadosList() {
 
     const response = await fetch('/.netlify/functions/get-markets', {
         method: 'GET',
-        headers: { 
+        headers: {
             'Content-Type': 'application/json'
         }
     });
 
     if (!response.ok) {
         console.error('Erro ao buscar mercados:', response.statusText);
-    }
-    const result = await response.json();
-
-    if(!result){
         showMessage('Erro ao buscar mercados na base de dados.', 'error');
         return;
     }
-    
-    result.map(market => {
+    const result = await response.json();
+
+    if(!Array.isArray(result)){
+        showMessage('Erro ao buscar mercados na base de dados.', 'error');
+        return;
+    }
+
+    result.forEach(market => {
         if (!mercados.some(m => m.id === market.id)){
             // Adiciona mercado ao array
             mercados.push({

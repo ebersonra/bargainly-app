@@ -1,10 +1,11 @@
 async function loadBudgets() {
   try {
     const res = await fetch('/.netlify/functions/get-budget-status');
+    if (!res.ok) throw new Error('Falha ao carregar metas');
     const budgets = await res.json();
     const list = document.getElementById('budgetsList');
     list.innerHTML = '';
-    if (budgets.length === 0) {
+    if (!Array.isArray(budgets) || budgets.length === 0) {
       list.innerHTML = '<p>Nenhuma meta cadastrada</p>';
       return;
     }
