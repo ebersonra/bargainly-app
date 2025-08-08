@@ -1,7 +1,9 @@
 async function loadDashboard() {
   try {
     const res = await fetch('/.netlify/functions/get-budget-status');
+    if (!res.ok) throw new Error('Falha ao carregar metas');
     const budgets = await res.json();
+    if (!Array.isArray(budgets)) throw new Error('Resposta inválida');
     const list = document.getElementById('dashboardList');
     list.innerHTML = '';
     budgets.forEach(b => {

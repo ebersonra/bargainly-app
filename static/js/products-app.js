@@ -147,22 +147,24 @@ async function updateProdutosList() {
 
     const response = await fetch('/.netlify/functions/get-products', {
         method: 'GET',
-        headers: { 
+        headers: {
             'Content-Type': 'application/json'
         }
     });
 
     if (!response.ok) {
         console.error('Erro ao buscar produtos:', response.statusText);
+        showMessage('Erro ao buscar produtos na base de dados.', 'error');
+        return;
     }
     const result = await response.json();
 
-    if(!result){
+    if(!Array.isArray(result)){
         showMessage('Erro ao buscar produtos na base de dados.', 'error');
         return;
     }
 
-    result.map(product => {
+    result.forEach(product => {
         if (!produtos.some(p => p.id === product.id)){
             // Adiciona produto ao array
             produtos.push({
