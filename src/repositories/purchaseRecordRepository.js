@@ -29,6 +29,17 @@ async function fetchBudgets() {
   return data || [];
 }
 
+async function upsertBudget(budget) {
+  const supabase = getClient();
+  const { data, error } = await supabase
+    .from('budgets')
+    .upsert(budget)
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
 async function fetchTotalSpent() {
   const supabase = getClient();
   const { data, error } = await supabase
@@ -38,4 +49,4 @@ async function fetchTotalSpent() {
   return data || [];
 }
 
-module.exports = { insertPurchaseRecord, fetchBudgets, fetchTotalSpent };
+module.exports = { insertPurchaseRecord, fetchBudgets, fetchTotalSpent, upsertBudget };

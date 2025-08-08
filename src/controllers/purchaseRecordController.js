@@ -8,4 +8,8 @@ async function getBudgetStatus(srv = service) {
   return srv.getBudgetStatus();
 }
 
-module.exports = { insertPurchaseRecord, getBudgetStatus };
+async function setBudget(data, srv = service) {
+  return srv.setBudget(data);
+}
+
+module.exports = { insertPurchaseRecord, getBudgetStatus, setBudget };

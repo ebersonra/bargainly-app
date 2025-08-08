@@ -493,3 +493,17 @@ body {
   object-fit: cover;
   z-index: 1;
 }
+
+.budget-bar-container {
+  width: 100%;
+  background: #e2e8f0;
+  height: 10px;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
+.budget-bar {
+  height: 10px;
+  background: #48bb78;
+  border-radius: 4px;
+}
