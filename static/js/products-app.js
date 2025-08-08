@@ -1,3 +1,5 @@
+let produtos = [];
+
 // Buscar produto por código de barras
 document.getElementById('buscarProduto').addEventListener('click', async function() {
     const codigoBarras = document.getElementById('codigoBarras').value.trim();
