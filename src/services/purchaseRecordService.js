@@ -9,9 +9,23 @@ function validateRecord(data) {
   }
 }
 
+function validateBudget(data) {
+  const required = ['category', 'limit'];
+  for (const field of required) {
+    if (data[field] === undefined || data[field] === null) {
+      throw new Error(`Missing field: ${field}`);
+    }
+  }
+}
+
 async function insertPurchaseRecord(data, repo = repository) {
   validateRecord(data);
   return repo.insertPurchaseRecord(data);
+}
+
+async function setBudget(data, repo = repository) {
+  validateBudget(data);
+  return repo.upsertBudget(data);
 }
 
 async function getBudgetStatus(repo = repository) {
@@ -37,4 +51,4 @@ async function getBudgetStatus(repo = repository) {
   });
 }
 
-module.exports = { insertPurchaseRecord, getBudgetStatus };
+module.exports = { insertPurchaseRecord, getBudgetStatus, setBudget };

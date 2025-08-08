@@ -17,6 +17,9 @@
             <button class="nav-tab active" onclick="showTab('mercados')">Mercados</button>
             <button class="nav-tab" onclick="showTab('produtos')">Produtos</button>
             <button class="nav-tab" onclick="showTab('barganha')">🔥 Barganha</button>
+            <button class="nav-tab" onclick="showTab('metas')">Metas</button>
+            <button class="nav-tab" onclick="showTab('compra')">Registrar Compra</button>
+            <button class="nav-tab" onclick="showTab('dashboard')">Dashboard</button>
         </div>
 
         <!-- Tab Mercados -->
@@ -142,6 +145,34 @@
                 </div>
             </div>
         </div>
+
+        <!-- Tab Metas -->
+        <div id="metas" class="tab-content">
+            <h2>Metas e Orçamento</h2>
+            <form id="budgetForm">
+                <input type="text" id="budgetCategory" placeholder="Categoria" required>
+                <input type="number" id="budgetLimit" placeholder="Limite" required>
+                <button type="submit" class="btn">Salvar</button>
+            </form>
+            <div id="budgetsList" class="items-grid"></div>
+        </div>
+
+        <!-- Tab Registrar Compra -->
+        <div id="compra" class="tab-content">
+            <h2>Registrar Compra</h2>
+            <form id="purchaseForm">
+                <input type="number" id="purchaseAmount" placeholder="Valor" step="0.01" required>
+                <input type="text" id="purchaseCategory" placeholder="Categoria" required>
+                <input type="date" id="purchaseDate" required>
+                <button type="submit" class="btn">Registrar</button>
+            </form>
+        </div>
+
+        <!-- Tab Dashboard -->
+        <div id="dashboard" class="tab-content">
+            <h2>Dashboard</h2>
+            <div id="dashboardList" class="items-grid"></div>
+        </div>
     </div>
 
     <!-- index.html -->
@@ -152,6 +183,9 @@
     <script src="/static/js/barcode-scanner.js"></script>
     <script src="/static/js/bargainly-app.js"></script>
     <script src="/static/js/tabs-app.js"></script>
-    
+    <script src="/static/js/budgets-app.js"></script>
+    <script src="/static/js/purchase-app.js"></script>
+    <script src="/static/js/dashboard-app.js"></script>
+
 </body>
 </html>

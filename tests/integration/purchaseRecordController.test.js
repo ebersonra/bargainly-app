@@ -27,3 +27,12 @@ test('controller integrates with service to get budget status', async () => {
     { category: 'food', limit: 100, spent: 50, percentage: 50, alert: null }
   ]);
 });
+
+test('controller integrates with service to set budget', async () => {
+  const mockRepo = { upsertBudget: async (data) => ({ id: 1, ...data }) };
+  const mockService = {
+    setBudget: (data) => service.setBudget(data, mockRepo)
+  };
+  const result = await controller.setBudget({ category: 'travel', limit: 300 }, mockService);
+  assert.equal(result.id, 1);
+});
