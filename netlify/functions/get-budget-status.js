@@ -10,7 +10,11 @@ function buildHandler(ctrl = controller) {
       return { statusCode: 405, body: 'Method Not Allowed' };
     }
     try {
-      const result = await ctrl.getBudgetStatus();
+      const user_id = event.queryStringParameters?.user_id;
+      if (!user_id) {
+        return { statusCode: 400, body: JSON.stringify({ error: 'Missing user_id' }) };
+      }
+      const result = await ctrl.getBudgetStatus(user_id);
       return { statusCode: 200, body: JSON.stringify(result) };
     } catch (e) {
       return { statusCode: 500, body: JSON.stringify({ error: e.message }) };

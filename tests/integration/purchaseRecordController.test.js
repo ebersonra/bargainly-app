@@ -20,9 +20,9 @@ test('controller integrates with service to get budget status', async () => {
     fetchTotalSpent: async () => [{ category: 'food', amount: 50 }]
   };
   const mockService = {
-    getBudgetStatus: () => service.getBudgetStatus(mockRepo)
+    getBudgetStatus: (user_id) => service.getBudgetStatus(user_id, mockRepo)
   };
-  const result = await controller.getBudgetStatus(mockService);
+  const result = await controller.getBudgetStatus('user1', mockService);
   assert.deepStrictEqual(result, [
     { category: 'food', limit: 100, spent: 50, percentage: 50, alert: null }
   ]);
@@ -33,6 +33,6 @@ test('controller integrates with service to set budget', async () => {
   const mockService = {
     setBudget: (data) => service.setBudget(data, mockRepo)
   };
-  const result = await controller.setBudget({ category: 'travel', limit: 300 }, mockService);
+  const result = await controller.setBudget({ user_id: 'u1', category: 'travel', limit: 300 }, mockService);
   assert.equal(result.id, 1);
 });
