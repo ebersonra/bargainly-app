@@ -1,5 +1,14 @@
 let produtos = [];
 
+async function getUserId() {
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) {
+        console.error('Erro ao obter usuário:', error);
+        throw error || new Error('Usuário não autenticado');
+    }
+    return data.user.id;
+}
+
 // Buscar produto por código de barras
 document.getElementById('buscarProduto').addEventListener('click', async function() {
     const codigoBarras = document.getElementById('codigoBarras').value.trim();

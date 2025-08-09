@@ -1,3 +1,12 @@
+async function getUserId() {
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) {
+    console.error('Erro ao obter usuário:', error);
+    throw error || new Error('Usuário não autenticado');
+  }
+  return data.user.id;
+}
+
 async function loadDashboard() {
   try {
     const user_id = await getUserId();
