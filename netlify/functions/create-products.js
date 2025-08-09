@@ -12,6 +12,7 @@ exports.handler = async function(event) {
 
   try {
     const {
+      user_id,
       mercadoId,
       nome,
       unidade,
@@ -22,9 +23,14 @@ exports.handler = async function(event) {
       barcode
     } = JSON.parse(event.body);
 
+    if (!user_id) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Missing user_id' }) };
+    }
+
     const url = `${process.env.SUPABASE_URL}/rest/v1/products`;
     const body = JSON.stringify([
       {
+        user_id,
         market_id: mercadoId,
         name: nome,
         unit: unidade,
@@ -55,6 +61,7 @@ exports.handler = async function(event) {
     const data = await response.json();
     return { statusCode: 200, body: JSON.stringify(data[0]) };
   } catch (e) {
+    console.error('Erro ao inserir produto:', e);
     return { statusCode: 500, body: JSON.stringify({ error: e.message }) };
   }
 };
