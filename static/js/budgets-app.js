@@ -1,6 +1,16 @@
+async function getUserId() {
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) {
+    console.error('Erro ao obter usuário:', error);
+    throw error || new Error('Usuário não autenticado');
+  }
+  return data.user.id;
+}
+
 async function loadBudgets() {
   try {
-    const res = await fetch('/.netlify/functions/get-budget-status');
+    const user_id = await getUserId();
+    const res = await fetch(`/.netlify/functions/get-budget-status?user_id=${user_id}`);
     if (!res.ok) throw new Error('Falha ao carregar metas');
     const budgets = await res.json();
     const list = document.getElementById('budgetsList');
@@ -31,12 +41,21 @@ async function loadBudgets() {
 
 async function submitBudgetForm(e) {
   e.preventDefault();
-  const category = document.getElementById('budgetCategory').value;
-  const limit = Number(document.getElementById('budgetLimit').value);
-  await fetch('/.netlify/functions/set-budget', {
-    method: 'POST',
-    body: JSON.stringify({ category, limit })
-  });
+  try {
+    const user_id = await getUserId();
+    const category = document.getElementById('budgetCategory').value;
+    const limit = Number(document.getElementById('budgetLimit').value);
+    const res = await fetch('/.netlify/functions/set-budget', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id, category, limit })
+    });
+    if (!res.ok) {
+      console.error('Erro ao salvar meta:', await res.text());
+    }
+  } catch (err) {
+    console.error(err);
+  }
   e.target.reset();
   loadBudgets();
 }
