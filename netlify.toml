@@ -1,3 +1,8 @@
 [build]
   publish = "."
-  command = "sed -i \"s/__GEMINI_API_KEY__/$GEMINI_API_KEY/g\" poc/poc-upload-captura-foto-ocr-gemini.html && echo 'Deploy estático'" 
+  command = '''
+  sed -i "s/__GEMINI_API_KEY__/$GEMINI_API_KEY/g" poc/poc-upload-captura-foto-ocr-gemini.html &&
+  sed -i "s|__SUPABASE_URL__|$SUPABASE_URL|g" index.html &&
+  sed -i "s|__SUPABASE_ANON_KEY__|$SUPABASE_ANON_KEY|g" index.html &&
+  echo 'Deploy estático'
+  '''

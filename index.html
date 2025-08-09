@@ -177,7 +177,7 @@
 
     <!-- index.html -->
       <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-      <script src="/static/js/env.js"></script>
+      <script>window.SUPABASE_URL="__SUPABASE_URL__";window.SUPABASE_ANON_KEY="__SUPABASE_ANON_KEY__";</script>
       <script src="/static/js/supabase-client.js"></script>
       <script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.min.js"></script>
       <script src="/static/js/utils.js"></script>
