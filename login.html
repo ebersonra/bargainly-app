@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Barganha App</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <style>
+    .login-form {
+      max-width: 400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Barganha App</h1>
+      <p>Faça login para continuar</p>
+    </div>
+    <form id="loginForm" class="login-form">
+      <div class="input-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" required />
+      </div>
+      <div class="input-group">
+        <label for="password">Senha</label>
+        <input type="password" id="password" required />
+      </div>
+      <button type="submit" class="btn">Entrar</button>
+      <div id="loginError" class="error-message"></div>
+    </form>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>window.SUPABASE_URL="__SUPABASE_URL__";window.SUPABASE_ANON_KEY="__SUPABASE_ANON_KEY__";</script>
+  <script src="/static/js/supabase-client.js"></script>
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/login-app.js"></script>
+</body>
+</html>
