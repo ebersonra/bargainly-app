@@ -10,7 +10,7 @@ function validateRecord(data) {
 }
 
 function validateBudget(data) {
-  const required = ['category', 'limit'];
+  const required = ['user_id', 'category', 'limit'];
   for (const field of required) {
     if (data[field] === undefined || data[field] === null) {
       throw new Error(`Missing field: ${field}`);
@@ -28,9 +28,9 @@ async function setBudget(data, repo = repository) {
   return repo.upsertBudget(data);
 }
 
-async function getBudgetStatus(repo = repository) {
-  const budgets = await repo.fetchBudgets();
-  const spent = await repo.fetchTotalSpent();
+async function getBudgetStatus(user_id, repo = repository) {
+  const budgets = await repo.fetchBudgets(user_id);
+  const spent = await repo.fetchTotalSpent(user_id);
   const totals = spent.reduce((acc, rec) => {
     acc[rec.category] = (acc[rec.category] || 0) + rec.amount;
     return acc;

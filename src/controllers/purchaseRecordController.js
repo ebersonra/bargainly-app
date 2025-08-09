@@ -4,8 +4,8 @@ async function insertPurchaseRecord(data, srv = service) {
   return srv.insertPurchaseRecord(data);
 }
 
-async function getBudgetStatus(srv = service) {
-  return srv.getBudgetStatus();
+async function getBudgetStatus(user_id, srv = service) {
+  return srv.getBudgetStatus(user_id);
 }
 
 async function setBudget(data, srv = service) {

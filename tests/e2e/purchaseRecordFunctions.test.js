@@ -22,10 +22,10 @@ test('get-budget-status handler returns data with percentages', async () => {
     fetchTotalSpent: async () => [{ category: 'food', amount: 40 }]
   };
   const mockController = {
-    getBudgetStatus: () => service.getBudgetStatus(mockRepo)
+    getBudgetStatus: (user_id) => service.getBudgetStatus(user_id, mockRepo)
   };
   const handler = buildGet(mockController);
-  const event = { httpMethod: 'GET' };
+  const event = { httpMethod: 'GET', queryStringParameters: { user_id: 'u1' } };
   const res = await handler(event);
   const body = JSON.parse(res.body);
   assert.equal(body[0].percentage, 40);
@@ -37,7 +37,7 @@ test('set-budget handler returns 200', async () => {
     setBudget: (data) => service.setBudget(data, mockRepo)
   };
   const handler = buildSet(mockController);
-  const event = { httpMethod: 'POST', body: JSON.stringify({ category: 'food', limit: 100 }) };
+  const event = { httpMethod: 'POST', body: JSON.stringify({ user_id: 'u1', category: 'food', limit: 100 }) };
   const res = await handler(event);
   assert.equal(res.statusCode, 200);
 });
