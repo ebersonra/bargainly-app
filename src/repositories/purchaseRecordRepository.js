@@ -2,7 +2,7 @@ const { createClient } = require('@supabase/supabase-js');
 
 function getClient() {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_API_KEY || process.env.SUPABASE_ANON_KEY;
+  const supabaseKey = process.env.SUPABASE_PUBLISHABLE_KEY;
   if (!supabaseUrl || !supabaseKey) {
     throw new Error('Supabase credentials are required');
   }
@@ -40,8 +40,7 @@ async function upsertBudget(budget) {
   const { data: cat, error: catError } = await supabase
     .from('purchase_categories')
     .select('id')
-    .eq('name', budget.category)
-    .single();
+    .eq('name', budget.category);
   if (catError) throw new Error(catError.message);
   const payload = {
     user_id: budget.user_id || null,
@@ -52,10 +51,10 @@ async function upsertBudget(budget) {
   const { data, error } = await supabase
     .from('budget_goals')
     .upsert(payload)
-    .select()
-    .single();
+    .select();
   if (error) throw new Error(error.message);
-  return { ...data, category: budget.category, limit: data.target_value };
+  const result = Array.isArray(data) ? data[0] : data;
+  return { ...result, category: budget.category, limit: result?.target_value };
 }
 
 async function fetchTotalSpent() {
