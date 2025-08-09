@@ -114,10 +114,12 @@ document.getElementById('produtoForm').addEventListener('submit', async function
 
     // Envia para Supabase via função serverless
     try {
-        await fetch('/.netlify/functions/create-products', {
+        const user_id = await getUserId();
+        const res = await fetch('/.netlify/functions/create-products', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
+                user_id,
                 mercadoId,
                 nome,
                 unidade,
@@ -128,6 +130,9 @@ document.getElementById('produtoForm').addEventListener('submit', async function
                 barcode
             })
         });
+        if (!res.ok) {
+            console.error('Erro ao salvar produto:', await res.text());
+        }
     } catch (err) {
         console.error('Erro ao salvar produto no Supabase', err);
     }
@@ -145,41 +150,48 @@ document.getElementById('produtoForm').addEventListener('submit', async function
 async function updateProdutosList() {
     const container = document.getElementById('produtosList');
 
-    const response = await fetch('/.netlify/functions/get-products', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    });
+    try {
+        const user_id = await getUserId();
+        const response = await fetch(`/.netlify/functions/get-products?user_id=${user_id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
 
-    if (!response.ok) {
-        console.error('Erro ao buscar produtos:', response.statusText);
+        if (!response.ok) {
+            console.error('Erro ao buscar produtos:', await response.text());
+            showMessage('Erro ao buscar produtos na base de dados.', 'error');
+            return;
+        }
+        const result = await response.json();
+
+        if(!Array.isArray(result)){
+            showMessage('Erro ao buscar produtos na base de dados.', 'error');
+            return;
+        }
+
+        result.forEach(product => {
+            if (!produtos.some(p => p.id === product.id)){
+                // Adiciona produto ao array
+                produtos.push({
+                    id: product.id,
+                    mercadoId: product.market_id,
+                    nome: product.name,
+                    unidade: product.unit,
+                    valor: product.price,
+                    categoria: product.category,
+                    gtin: product.gtin || null,
+                    thumbnail: product.thumbnail || 'static/img/products/prod_ind_v4.webp',
+                    barcode: product.barcode || 'static/img/products/prod_ind_v4.webp'
+                });
+            }
+        });
+    } catch (err) {
+        console.error('Erro ao buscar produtos:', err);
         showMessage('Erro ao buscar produtos na base de dados.', 'error');
         return;
     }
-    const result = await response.json();
-
-    if(!Array.isArray(result)){
-        showMessage('Erro ao buscar produtos na base de dados.', 'error');
-        return;
-    }
-
-    result.forEach(product => {
-        if (!produtos.some(p => p.id === product.id)){
-            // Adiciona produto ao array
-            produtos.push({
-                id: product.id,
-                mercadoId: product.market_id,
-                nome: product.name,
-                unidade: product.unit,
-                valor: product.price,
-                categoria: product.category,
-                gtin: product.gtin || null,
-                thumbnail: product.thumbnail || 'static/img/products/prod_ind_v4.webp',
-                barcode: product.barcode || 'static/img/products/prod_ind_v4.webp'
-            });
-        }
-    })
     
     if (produtos.length === 0) {
         container.innerHTML = `
