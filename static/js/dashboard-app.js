@@ -1,6 +1,16 @@
+async function getUserId() {
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) {
+    console.error('Erro ao obter usuário:', error);
+    throw error || new Error('Usuário não autenticado');
+  }
+  return data.user.id;
+}
+
 async function loadDashboard() {
   try {
-    const res = await fetch('/.netlify/functions/get-budget-status');
+    const user_id = await getUserId();
+    const res = await fetch(`/.netlify/functions/get-budget-status?user_id=${user_id}`);
     if (!res.ok) throw new Error('Falha ao carregar metas');
     const budgets = await res.json();
     if (!Array.isArray(budgets)) throw new Error('Resposta inválida');
