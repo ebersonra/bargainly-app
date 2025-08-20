@@ -1,3 +1,14 @@
+async function getUserId() {
+    // Recupera o valor do cookie 'user_id'
+    const match = document.cookie.match(/(?:^|; )user_id=([^;]*)/);
+    if (match && match[1]) {
+        return decodeURIComponent(match[1]);
+    } else {
+        console.error('Usuário não autenticado (cookie user_id não encontrado)');
+        throw new Error('Usuário não autenticado');
+    }
+}
+
 // Função para mostrar notificações
 function showNotification(message, type) {
     const notification = document.createElement('div');

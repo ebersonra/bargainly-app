@@ -1,30 +1,29 @@
-async function getUserId() {
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data.user) {
-    console.error('Erro ao obter usuário:', error);
-    throw error || new Error('Usuário não autenticado');
-  }
-  return data.user.id;
-}
-
 async function loadBudgets() {
   try {
     const user_id = await getUserId();
     const res = await fetch(`/.netlify/functions/get-budget-status?user_id=${user_id}`);
-    if (!res.ok) throw new Error('Falha ao carregar metas');
+    
+    if (!res.ok) {
+      throw new Error('Falha ao carregar metas');
+    }
+
     const budgets = await res.json();
     const list = document.getElementById('budgetsList');
     list.innerHTML = '';
+
     if (!Array.isArray(budgets) || budgets.length === 0) {
       list.innerHTML = '<p>Nenhuma meta cadastrada</p>';
       return;
     }
+    
     budgets.forEach(b => {
       const item = document.createElement('div');
       item.className = 'budget-item';
+
       const bar = document.createElement('div');
       bar.className = 'budget-bar';
       bar.style.width = Math.min(b.percentage, 100) + '%';
+      
       if (b.alert === 'near limit') bar.style.background = '#ecc94b';
       if (b.alert === 'limit exceeded') bar.style.background = '#e53e3e';
       item.innerHTML = `<strong>${b.category}</strong>: R$${b.spent} / R$${b.limit}`;

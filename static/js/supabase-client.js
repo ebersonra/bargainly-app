@@ -1,14 +1,14 @@
 // Initialize Supabase client for both browser and Netlify/Node environments
 (function (global) {
   let url = global.SUPABASE_URL;
-  let anonKey = global.SUPABASE_ANON_KEY;
+  let anonKey = global.SUPABASE_PUBLISHABLE_KEY;
 
   if ((!url || !anonKey) && typeof process !== 'undefined' && process.env) {
     if (process.env.NODE_ENV !== 'production') {
       try { require('dotenv').config(); } catch (e) {}
     }
     url = url || process.env.SUPABASE_URL;
-    anonKey = anonKey || process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_API_KEY;
+    anonKey = anonKey || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_API_KEY;
   }
 
   if (!url || !anonKey) {

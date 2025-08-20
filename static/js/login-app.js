@@ -6,11 +6,11 @@ async function handleLogin(event) {
     console.error('Supabase client not initialized');
     return;
   }
+  showMessage('Fazendo login...', 'loading');
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
     console.error('Erro de login:', error.message);
-    const errEl = document.getElementById('loginError');
-    if (errEl) errEl.textContent = 'Falha no login';
+    showMessage('Falha no login', 'error');
     return;
   }
   setUserCookie(data.user.id);

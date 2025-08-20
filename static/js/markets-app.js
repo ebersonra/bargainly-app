@@ -60,10 +60,11 @@ document.getElementById('mercadoForm').addEventListener('submit', async function
 
     // Envia para Supabase via função serverless
     try {
+        user_id = await getUserId();
         await fetch('/.netlify/functions/create-markets', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nome, endereco, cnpj })
+            body: JSON.stringify({ nome, endereco, cnpj, user_id })
         });
     } catch (err) {
         console.error('Erro ao salvar mercado no Supabase', err);

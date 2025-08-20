@@ -150,9 +150,17 @@
         <div id="metas" class="tab-content">
             <h2>Metas e Orçamento</h2>
             <form id="budgetForm">
-                <input type="text" id="budgetCategory" placeholder="Categoria" required>
-                <input type="number" id="budgetLimit" placeholder="Limite" required>
-                <button type="submit" class="btn">Salvar</button>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label for="budgetCategory">Categoria</label>
+                        <input type="text" id="budgetCategory" placeholder="Categoria" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="budgetLimit">Limite</label>
+                        <input type="number" id="budgetLimit" placeholder="Limite" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn">Cadastrar Categoria</button>
             </form>
             <div id="budgetsList" class="items-grid"></div>
         </div>
@@ -161,9 +169,20 @@
         <div id="compra" class="tab-content">
             <h2>Registrar Compra</h2>
             <form id="purchaseForm">
-                <input type="number" id="purchaseAmount" placeholder="Valor" step="0.01" required>
-                <input type="text" id="purchaseCategory" placeholder="Categoria" required>
-                <input type="date" id="purchaseDate" required>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label for="purchaseAmount">Valor da Compra</label>
+                        <input type="number" id="purchaseAmount" placeholder="Valor" step="0.01" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="purchaseCategory">Categoria</label>
+                        <input type="text" id="purchaseCategory" placeholder="Categoria" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="purchaseDate">Data da Compra</label>
+                        <input type="date" id="purchaseDate" required>
+                    </div>
+                </div>
                 <button type="submit" class="btn">Registrar</button>
             </form>
         </div>
@@ -176,20 +195,17 @@
     </div>
 
     <!-- index.html -->
-      <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-      <script>window.SUPABASE_URL="__SUPABASE_URL__";window.SUPABASE_ANON_KEY="__SUPABASE_ANON_KEY__";</script>
-      <script src="/static/js/supabase-client.js"></script>
-      <script src="/static/js/auth.js"></script>
-      <script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.min.js"></script>
-      <script src="/static/js/utils.js"></script>
-      <script src="/static/js/products-app.js"></script>
-      <script src="/static/js/markets-app.js"></script>
-      <script src="/static/js/barcode-scanner.js"></script>
-      <script src="/static/js/bargainly-app.js"></script>
-      <script src="/static/js/tabs-app.js"></script>
-      <script src="/static/js/budgets-app.js"></script>
-      <script src="/static/js/purchase-app.js"></script>
-      <script src="/static/js/dashboard-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.min.js"></script>
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/products-app.js"></script>
+    <script src="/static/js/markets-app.js"></script>
+    <script src="/static/js/barcode-scanner.js"></script>
+    <script src="/static/js/bargainly-app.js"></script>
+    <script src="/static/js/tabs-app.js"></script>
+    <script src="/static/js/budgets-app.js"></script>
+    <script src="/static/js/purchase-app.js"></script>
+    <script src="/static/js/dashboard-app.js"></script>
 
 </body>
 </html>
