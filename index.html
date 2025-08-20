@@ -17,6 +17,9 @@
             <button class="nav-tab active" onclick="showTab('mercados')">Mercados</button>
             <button class="nav-tab" onclick="showTab('produtos')">Produtos</button>
             <button class="nav-tab" onclick="showTab('barganha')">🔥 Barganha</button>
+            <button class="nav-tab" onclick="showTab('metas')">Metas</button>
+            <button class="nav-tab" onclick="showTab('compra')">Registrar Compra</button>
+            <button class="nav-tab" onclick="showTab('dashboard')">Dashboard</button>
         </div>
 
         <!-- Tab Mercados -->
@@ -142,13 +145,67 @@
                 </div>
             </div>
         </div>
+
+        <!-- Tab Metas -->
+        <div id="metas" class="tab-content">
+            <h2>Metas e Orçamento</h2>
+            <form id="budgetForm">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label for="budgetCategory">Categoria</label>
+                        <input type="text" id="budgetCategory" placeholder="Categoria" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="budgetLimit">Limite</label>
+                        <input type="number" id="budgetLimit" placeholder="Limite" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn">Cadastrar Categoria</button>
+            </form>
+            <div id="budgetsList" class="items-grid"></div>
+        </div>
+
+        <!-- Tab Registrar Compra -->
+        <div id="compra" class="tab-content">
+            <h2>Registrar Compra</h2>
+            <form id="purchaseForm">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label for="purchaseAmount">Valor da Compra</label>
+                        <input type="number" id="purchaseAmount" placeholder="Valor" step="0.01" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="purchaseCategory">Categoria</label>
+                        <input type="text" id="purchaseCategory" placeholder="Categoria" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="purchaseDate">Data da Compra</label>
+                        <input type="date" id="purchaseDate" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn">Registrar</button>
+            </form>
+        </div>
+
+        <!-- Tab Dashboard -->
+        <div id="dashboard" class="tab-content">
+            <h2>Dashboard</h2>
+            <div id="dashboardList" class="items-grid"></div>
+        </div>
     </div>
 
     <!-- index.html -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.min.js"></script>
+    <script src="/static/js/utils.js"></script>
     <script src="/static/js/bargainly-app.js"></script>
     <script src="/static/js/products-app.js"></script>
+    <script src="/static/js/markets-app.js"></script>
     <script src="/static/js/barcode-scanner.js"></script>
-    
+    <script src="/static/js/tabs-app.js"></script>
+    <script src="/static/js/budgets-app.js"></script>
+    <script src="/static/js/purchase-app.js"></script>
+    <script src="/static/js/dashboard-app.js"></script>
+
 </body>
 </html>

@@ -1,0 +1,38 @@
+const test = require('node:test');
+const assert = require('node:assert');
+const controller = require('../../src/controllers/purchaseRecordController');
+const service = require('../../src/services/purchaseRecordService');
+
+test('controller integrates with service to insert record', async () => {
+  const mockRepo = {
+    insertPurchaseRecord: async (rec) => ({ id: 1, ...rec })
+  };
+  const mockService = {
+    insertPurchaseRecord: (data) => service.insertPurchaseRecord(data, mockRepo)
+  };
+  const result = await controller.insertPurchaseRecord({ user_id: 1, amount: 5, category: 'food' }, mockService);
+  assert.equal(result.id, 1);
+});
+
+test('controller integrates with service to get budget status', async () => {
+  const mockRepo = {
+    fetchBudgets: async () => [{ category: 'food', limit: 100 }],
+    fetchTotalSpent: async () => [{ category: 'food', amount: 50 }]
+  };
+  const mockService = {
+    getBudgetStatus: (user_id) => service.getBudgetStatus(user_id, mockRepo)
+  };
+  const result = await controller.getBudgetStatus('user1', mockService);
+  assert.deepStrictEqual(result, [
+    { category: 'food', limit: 100, spent: 50, percentage: 50, alert: null }
+  ]);
+});
+
+test('controller integrates with service to set budget', async () => {
+  const mockRepo = { upsertBudget: async (data) => ({ id: 1, ...data }) };
+  const mockService = {
+    setBudget: (data) => service.setBudget(data, mockRepo)
+  };
+  const result = await controller.setBudget({ user_id: 'u1', category: 'travel', limit: 300 }, mockService);
+  assert.equal(result.id, 1);
+});

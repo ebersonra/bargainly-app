@@ -11,13 +11,16 @@ exports.handler = async function(event) {
   }
 
   try {
-    const { nome, endereco, cnpj } = JSON.parse(event.body);
+    const { nome, endereco, cnpj, user_id } = JSON.parse(event.body);
     if (!nome || !endereco) {
       return { statusCode: 400, body: 'Dados inválidos' };
     }
+    if (!user_id) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Missing user_id' }) };
+    }
 
     const url = `${process.env.SUPABASE_URL}/rest/v1/markets`;
-    const body = JSON.stringify([{ name: nome, address: endereco, cnpj: cnpj || null }]);
+    const body = JSON.stringify([{ name: nome, address: endereco, cnpj: cnpj || null, user_id: user_id }]);
 
     const response = await fetch(url, {
       method: 'POST',
