@@ -12,7 +12,7 @@ function buildHandler(ctrl = controller) {
     try {
       // Check if body is FormData (multipart) or JSON
       let data;
-      if (event.headers['content-type'] && event.headers['content-type'].includes('multipart/form-data')) {
+      if (event.headers && event.headers['content-type'] && event.headers['content-type'].includes('multipart/form-data')) {
         // Handle FormData for file uploads
         const base64Body = event.isBase64Encoded ? event.body : Buffer.from(event.body, 'binary').toString('base64');
         data = { image: base64Body, contentType: event.headers['content-type'] };
