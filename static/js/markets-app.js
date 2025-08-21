@@ -138,14 +138,6 @@ async function updateMercadosList() {
         </div>
     `).join('');
 
-    updateMercadoSelect();
-}
-
-// Atualizar select de mercados
-function updateMercadoSelect() {
-    const select = document.getElementById('produtoMercado');
-    select.innerHTML = '<option value="">Selecione um mercado</option>' +
-        mercados.map(mercado => `<option value="${mercado.id}">${mercado.nome} / ${mercado.endereco}</option>`).join('');
 }
 
 // Inicialização

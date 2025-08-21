@@ -1,4 +1,19 @@
 let produtos = [];
+let mercados = [];
+
+// Initialize page data
+async function initializeProductsPage() {
+    try {
+        // Load markets for the select
+        mercados = await loadMarkets();
+        populateMarketSelect('produtoMercado');
+        
+        // Load existing products
+        updateProdutosList();
+    } catch (error) {
+        console.error('Erro ao inicializar página de produtos:', error);
+    }
+}
 
 // Buscar produto por código de barras
 document.getElementById('buscarProduto').addEventListener('click', async function() {
@@ -250,4 +265,4 @@ function showProductInfo(data) {
 }
 
 // Inicialização
-updateProdutosList();
+initializeProductsPage();

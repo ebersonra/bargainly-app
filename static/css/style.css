@@ -536,3 +536,187 @@ body {
   background: #48bb78;
   border-radius: 4px;
 }
+
+/* Home page specific styles */
+.quick-action-card {
+    display: block;
+    background: var(--neutral-50);
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    text-decoration: none;
+    color: inherit;
+    transition: all var(--transition-base);
+    text-align: center;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-300);
+    text-decoration: none;
+}
+
+.quick-action-icon {
+    font-size: var(--text-3xl);
+    margin-bottom: var(--space-3);
+}
+
+.quick-action-card h3 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--neutral-800);
+    margin-bottom: var(--space-2);
+}
+
+.quick-action-card p {
+    font-size: var(--text-sm);
+    color: var(--neutral-600);
+}
+
+.step-card {
+    background: var(--neutral-50);
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    text-align: center;
+    transition: all var(--transition-base);
+}
+
+.step-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.step-number {
+    width: 3rem;
+    height: 3rem;
+    background: var(--primary-600);
+    color: var(--neutral-50);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    margin: 0 auto var(--space-3);
+}
+
+.step-card h4 {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--neutral-800);
+    margin-bottom: var(--space-2);
+}
+
+.step-card p {
+    font-size: var(--text-sm);
+    color: var(--neutral-600);
+    margin-bottom: var(--space-3);
+}
+
+.empty-state-sm {
+    text-align: center;
+    color: var(--neutral-400);
+    padding: var(--space-6);
+}
+
+.empty-state-sm span {
+    font-size: var(--text-3xl);
+    display: block;
+    margin-bottom: var(--space-3);
+}
+
+.empty-state-sm p {
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-3);
+}
+
+/* Purchase page specific styles */
+.upload-area {
+    border: 2px dashed var(--neutral-300);
+    border-radius: var(--radius-lg);
+    padding: var(--space-8);
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.upload-area:hover,
+.upload-area.dragover {
+    border-color: var(--primary-500);
+    background: var(--primary-50);
+}
+
+.upload-icon {
+    width: 3rem;
+    height: 3rem;
+    margin: 0 auto var(--space-4);
+    color: var(--neutral-400);
+}
+
+.upload-content h3 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--neutral-700);
+    margin-bottom: var(--space-2);
+}
+
+.upload-content p {
+    color: var(--neutral-500);
+    font-size: var(--text-sm);
+}
+
+.loading-spinner {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid var(--neutral-300);
+    border-top-color: var(--primary-600);
+    border-radius: var(--radius-full);
+    animation: spin 1s linear infinite;
+}
+
+.purchase-item {
+    background: var(--neutral-50);
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    margin-bottom: var(--space-3);
+}
+
+.ocr-item {
+    transition: all var(--transition-base);
+}
+
+.ocr-item:hover {
+    background: var(--neutral-100) !important;
+}
+
+/* Modern textarea styles */
+textarea {
+    background: var(--neutral-50);
+    border: 1px solid var(--neutral-300);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    font-family: inherit;
+    font-size: var(--text-base);
+    color: var(--neutral-900);
+    resize: vertical;
+    min-height: 80px;
+    transition: all var(--transition-base);
+}
+
+textarea:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px var(--primary-100);
+    background: var(--neutral-50);
+}
+
+textarea:hover {
+    border-color: var(--neutral-400);
+}
+
+textarea::placeholder {
+    color: var(--neutral-500);
+}
