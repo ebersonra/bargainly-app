@@ -720,3 +720,102 @@ textarea:hover {
 textarea::placeholder {
     color: var(--neutral-500);
 }
+
+/* Modern select styles */
+select {
+    background: var(--neutral-50);
+    border: 1px solid var(--neutral-300);
+    border-radius: var(--radius-md);
+    padding: var(--space-2) var(--space-3);
+    font-family: inherit;
+    font-size: var(--text-sm);
+    color: var(--neutral-900);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right var(--space-2) center;
+    background-size: 1rem;
+    padding-right: var(--space-8);
+}
+
+select:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px var(--primary-100);
+    background: var(--neutral-50);
+}
+
+select:hover {
+    border-color: var(--neutral-400);
+}
+
+select:disabled {
+    background: var(--neutral-100);
+    color: var(--neutral-500);
+    cursor: not-allowed;
+}
+
+/* Dashboard specific styles */
+.stat-card {
+    background: var(--neutral-50);
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    transition: all var(--transition-base);
+}
+
+.stat-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.chart-container {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.empty-chart {
+    text-align: center;
+    color: var(--neutral-400);
+}
+
+.empty-chart span {
+    font-size: var(--text-3xl);
+    display: block;
+    margin-bottom: var(--space-2);
+}
+
+.recent-item {
+    padding: var(--space-3);
+    border-bottom: 1px solid var(--neutral-200);
+}
+
+.recent-item:last-child {
+    border-bottom: none;
+}
+
+.progress-bar {
+    height: 8px;
+    background: var(--neutral-200);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary-500);
+    border-radius: var(--radius-full);
+    transition: width var(--transition-base);
+}
+
+.progress-warning {
+    background: var(--warning-500);
+}
+
+.progress-danger {
+    background: var(--error-500);
+}
