@@ -34,5 +34,37 @@ Este projeto explora diferentes abordagens para extração e organização de da
 - Adicionar busca, filtros e exportação de dados
 - Melhorar tratamento de erros e feedback ao usuário
 
+## Executando os Testes
+
+Este projeto inclui testes abrangentes para garantir a qualidade do código:
+
+```bash
+# Executar todos os testes
+npm test
+
+# Executar apenas testes unitários
+npm run test:unit
+
+# Executar apenas testes de integração
+npm run test:integration
+
+# Executar apenas testes E2E
+npm run test:e2e
+
+# Executar testes em modo watch (re-executa ao alterar arquivos)
+npm run test:watch
+```
+
+### Cobertura de Testes
+- **Testes Unitários**: Validação da lógica de negócio dos serviços e repositórios
+- **Testes de Integração**: Validação da integração entre controllers e services
+- **Testes E2E**: Validação completa das funções Netlify
+
+### CI/CD
+Os testes são executados automaticamente no GitHub Actions:
+- Em todo pull request
+- Em pushes para as branches `main` e `develop`
+- O deploy é bloqueado se algum teste falhar
+
 ---
 *Projeto em evolução contínua. Veja a pasta `docs/` para ADRs e documentação técnica.*
