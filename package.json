@@ -8,6 +8,10 @@
     "netlify-cli": "^22.2.2"
   },
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "test:unit": "node --test tests/unit/",
+    "test:integration": "node --test tests/integration/",
+    "test:e2e": "node --test tests/e2e/",
+    "test:watch": "node --test --watch"
   }
 }
