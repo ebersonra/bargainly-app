@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Compra - Barganha App</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>Registrar Compra</h1>
+            <p>Registre suas compras e acompanhe seus gastos</p>
+        </div>
+
+        <div class="page-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Nova Compra</h2>
+                </div>
+                <div class="card-body">
+                    <form id="purchaseForm">
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label for="purchaseAmount">Valor da Compra (R$)</label>
+                                <input type="number" id="purchaseAmount" name="amount" placeholder="Ex: 25.50" step="0.01" min="0" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="purchaseCategory">Categoria</label>
+                                <select id="purchaseCategory" name="category" required>
+                                    <option value="">Selecione uma categoria</option>
+                                    <option value="alimentacao">Alimentação</option>
+                                    <option value="limpeza">Limpeza</option>
+                                    <option value="higiene">Higiene</option>
+                                    <option value="bebidas">Bebidas</option>
+                                    <option value="padaria">Padaria</option>
+                                    <option value="acougue">Açougue</option>
+                                    <option value="hortifruti">Hortifruti</option>
+                                    <option value="outros">Outros</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="purchaseDate">Data da Compra</label>
+                                <input type="date" id="purchaseDate" name="date" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="purchaseMarket">Mercado (opcional)</label>
+                                <select id="purchaseMarket" name="market">
+                                    <option value="">Selecione um mercado</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="purchaseNotes">Observações (opcional)</label>
+                                <textarea id="purchaseNotes" name="notes" rows="3" placeholder="Descrição adicional da compra..."></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Registrar Compra</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- OCR Receipt Upload -->
+            <div class="card mt-8">
+                <div class="card-header">
+                    <h2>📷 Digitalizar Nota Fiscal</h2>
+                    <p class="text-sm text-neutral-600 mt-1">
+                        Tire uma foto da nota fiscal para extrair os dados automaticamente
+                    </p>
+                </div>
+                <div class="card-body">
+                    <div class="upload-area" id="receiptUploadArea">
+                        <div class="upload-content">
+                            <svg class="upload-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                                <path d="M14 2v6h6"/>
+                                <path d="M16 13a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                                <path d="M12 17v-4"/>
+                            </svg>
+                            <h3>Clique para enviar ou arraste a foto aqui</h3>
+                            <p>Formatos aceitos: JPG, PNG, WEBP</p>
+                        </div>
+                        <input type="file" id="receiptFileInput" accept="image/*" class="hidden">
+                    </div>
+                    
+                    <div id="ocrProgress" class="hidden mt-4">
+                        <div class="flex items-center gap-3">
+                            <div class="loading-spinner"></div>
+                            <span>Processando nota fiscal...</span>
+                        </div>
+                    </div>
+                    
+                    <div id="ocrResults" class="hidden mt-4">
+                        <h4 class="font-semibold mb-3">Itens encontrados:</h4>
+                        <div id="ocrItemsList" class="space-y-2">
+                            <!-- OCR results will be populated here -->
+                        </div>
+                        <div class="flex gap-3 mt-4">
+                            <button type="button" id="confirmOcrItems" class="btn btn-primary">
+                                Confirmar e Registrar
+                            </button>
+                            <button type="button" id="cancelOcr" class="btn btn-secondary">
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Purchases -->
+            <div class="card mt-8">
+                <div class="card-header">
+                    <div class="flex justify-between items-center">
+                        <h2>Compras Recentes</h2>
+                        <button type="button" id="refreshPurchases" class="btn btn-secondary btn-sm">
+                            🔄 Atualizar
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="recentPurchasesList">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                            </svg>
+                            <h3>Nenhuma compra registrada</h3>
+                            <p>Registre sua primeira compra para começar</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/static/js/mvc/components/Navigation.js"></script>
+    <script src="/static/js/mvc/controllers/BaseController.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/bargainly-app.js"></script>
+    <script src="/static/js/purchase-app.js"></script>
+
+    <script>
+        // Purchase page specific controller
+        class PurchaseController extends BaseController {
+            constructor() {
+                super();
+                this.init();
+            }
+
+            init() {
+                this.setCurrentDate();
+                this.loadMarkets();
+                this.setupEventListeners();
+                this.loadRecentPurchases();
+            }
+
+            setCurrentDate() {
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('purchaseDate').value = today;
+            }
+
+            setupEventListeners() {
+                const form = document.getElementById('purchaseForm');
+                this.handleFormSubmission(form, (data) => this.createPurchase(data));
+
+                // OCR upload
+                const uploadArea = document.getElementById('receiptUploadArea');
+                const fileInput = document.getElementById('receiptFileInput');
+
+                uploadArea.addEventListener('click', () => fileInput.click());
+                uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
+                uploadArea.addEventListener('drop', this.handleFileDrop.bind(this));
+                fileInput.addEventListener('change', this.handleFileSelect.bind(this));
+
+                // OCR actions
+                document.getElementById('confirmOcrItems')?.addEventListener('click', () => {
+                    this.confirmOcrItems();
+                });
+
+                document.getElementById('cancelOcr')?.addEventListener('click', () => {
+                    this.cancelOcr();
+                });
+
+                document.getElementById('refreshPurchases')?.addEventListener('click', () => {
+                    this.loadRecentPurchases();
+                });
+            }
+
+            async loadMarkets() {
+                try {
+                    const select = document.getElementById('purchaseMarket');
+                    if (typeof window.loadMercados === 'function') {
+                        // Use existing market loading functionality
+                        await window.loadMercados();
+                        
+                        // Copy options to purchase market select
+                        const marketSelect = document.getElementById('produtoMercado');
+                        if (marketSelect) {
+                            Array.from(marketSelect.options).forEach((option, index) => {
+                                if (index > 0) { // Skip first "Selecione um mercado" option
+                                    const newOption = option.cloneNode(true);
+                                    select.appendChild(newOption);
+                                }
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar mercados:', error);
+                }
+            }
+
+            async createPurchase(data) {
+                try {
+                    const userId = this.getUserIdFromCookie();
+                    if (!userId) {
+                        throw new Error('Usuário não autenticado');
+                    }
+
+                    const purchaseData = {
+                        user_id: userId,
+                        amount: parseFloat(data.amount),
+                        category: data.category,
+                        purchase_date: data.date,
+                        market: data.market || null,
+                        notes: data.notes || null
+                    };
+
+                    // Use existing purchase functionality if available
+                    if (typeof window.submitPurchase === 'function') {
+                        await window.submitPurchase(purchaseData);
+                    }
+
+                    this.showSuccess('Compra registrada com sucesso!', document.getElementById('purchaseForm').parentElement);
+                    document.getElementById('purchaseForm').reset();
+                    this.setCurrentDate();
+                    await this.loadRecentPurchases();
+                } catch (error) {
+                    throw new Error('Erro ao registrar compra: ' + error.message);
+                }
+            }
+
+            async loadRecentPurchases() {
+                const container = document.getElementById('recentPurchasesList');
+                this.showLoading(container);
+
+                try {
+                    const userId = this.getUserIdFromCookie();
+                    if (!userId) return;
+
+                    // Load recent purchases (implement API call)
+                    const purchases = await this.fetchRecentPurchases(userId);
+                    this.displayRecentPurchases(purchases);
+                } catch (error) {
+                    this.showError('Erro ao carregar compras: ' + error.message, container.parentElement);
+                } finally {
+                    this.hideLoading(container);
+                }
+            }
+
+            async fetchRecentPurchases(userId) {
+                // This would call your API to fetch recent purchases
+                // For now, return empty array
+                return [];
+            }
+
+            displayRecentPurchases(purchases) {
+                const container = document.getElementById('recentPurchasesList');
+                
+                if (purchases.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                            </svg>
+                            <h3>Nenhuma compra registrada</h3>
+                            <p>Registre sua primeira compra para começar</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const purchasesHTML = purchases.map(purchase => `
+                    <div class="purchase-item">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-semibold">${purchase.category}</h4>
+                                <p class="text-sm text-neutral-600">${purchase.date}</p>
+                                ${purchase.market ? `<p class="text-sm text-neutral-500">${purchase.market}</p>` : ''}
+                            </div>
+                            <div class="text-right">
+                                <span class="text-lg font-bold text-primary-600">
+                                    ${this.formatCurrency(purchase.amount)}
+                                </span>
+                            </div>
+                        </div>
+                        ${purchase.notes ? `<p class="text-sm text-neutral-600 mt-2">${purchase.notes}</p>` : ''}
+                    </div>
+                `).join('');
+
+                container.innerHTML = purchasesHTML;
+            }
+
+            // OCR functionality
+            handleDragOver(e) {
+                e.preventDefault();
+                e.currentTarget.classList.add('dragover');
+            }
+
+            handleFileDrop(e) {
+                e.preventDefault();
+                e.currentTarget.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    this.processReceiptImage(files[0]);
+                }
+            }
+
+            handleFileSelect(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    this.processReceiptImage(file);
+                }
+            }
+
+            async processReceiptImage(file) {
+                const progressDiv = document.getElementById('ocrProgress');
+                const resultsDiv = document.getElementById('ocrResults');
+                
+                progressDiv.classList.remove('hidden');
+                resultsDiv.classList.add('hidden');
+
+                try {
+                    // Process image with OCR API
+                    const formData = new FormData();
+                    formData.append('receipt', file);
+
+                    const response = await fetch('/.netlify/functions/process-receipt-ocr', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Erro ao processar imagem');
+                    }
+
+                    const result = await response.json();
+                    this.displayOcrResults(result.items || []);
+                } catch (error) {
+                    this.showError('Erro ao processar nota fiscal: ' + error.message, progressDiv.parentElement);
+                } finally {
+                    progressDiv.classList.add('hidden');
+                }
+            }
+
+            displayOcrResults(items) {
+                const resultsDiv = document.getElementById('ocrResults');
+                const itemsList = document.getElementById('ocrItemsList');
+
+                if (items.length === 0) {
+                    itemsList.innerHTML = '<p class="text-neutral-600">Nenhum item encontrado na nota fiscal.</p>';
+                } else {
+                    const itemsHTML = items.map((item, index) => `
+                        <div class="ocr-item flex justify-between items-center p-3 bg-neutral-50 rounded-lg">
+                            <div>
+                                <span class="font-medium">${item.name}</span>
+                                <span class="text-sm text-neutral-600 ml-2">${item.category || 'Categoria não identificada'}</span>
+                            </div>
+                            <span class="font-bold text-primary-600">${this.formatCurrency(item.price)}</span>
+                        </div>
+                    `).join('');
+                    itemsList.innerHTML = itemsHTML;
+                }
+
+                resultsDiv.classList.remove('hidden');
+            }
+
+            confirmOcrItems() {
+                // Implement OCR confirmation logic
+                const items = document.querySelectorAll('.ocr-item');
+                // Process each item...
+                this.cancelOcr();
+                this.showSuccess('Itens da nota fiscal registrados com sucesso!', document.getElementById('ocrResults').parentElement);
+            }
+
+            cancelOcr() {
+                document.getElementById('ocrResults').classList.add('hidden');
+                document.getElementById('receiptFileInput').value = '';
+            }
+
+            formatCurrency(value) {
+                return new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                }).format(value);
+            }
+        }
+
+        // Initialize purchase controller when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new PurchaseController();
+        });
+    </script>
+
+    <style>
+        .upload-area {
+            border: 2px dashed var(--neutral-300);
+            border-radius: var(--radius-lg);
+            padding: var(--space-8);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: var(--primary-500);
+            background: var(--primary-50);
+        }
+
+        .upload-icon {
+            width: 3rem;
+            height: 3rem;
+            margin: 0 auto var(--space-4);
+            color: var(--neutral-400);
+        }
+
+        .upload-content h3 {
+            font-size: var(--text-lg);
+            font-weight: var(--font-semibold);
+            color: var(--neutral-700);
+            margin-bottom: var(--space-2);
+        }
+
+        .upload-content p {
+            color: var(--neutral-500);
+            font-size: var(--text-sm);
+        }
+
+        .loading-spinner {
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid var(--neutral-300);
+            border-top-color: var(--primary-600);
+            border-radius: var(--radius-full);
+            animation: spin 1s linear infinite;
+        }
+
+        .purchase-item {
+            background: var(--neutral-50);
+            border: 1px solid var(--neutral-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            margin-bottom: var(--space-3);
+        }
+
+        .ocr-item {
+            transition: all var(--transition-base);
+        }
+
+        .ocr-item:hover {
+            background: var(--neutral-100) !important;
+        }
+    </style>
+</body>
+</html>

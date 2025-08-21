@@ -1,41 +1,45 @@
+/* Import new design system */
+@import url('./design-system.css');
+@import url('./navigation.css');
+
 :root {
-    --primary-color: #667eea;
-    --secondary-color: #764ba2;
-    --default-color: #FFFFFF;
+    /* Legacy variables for backward compatibility */
+    --primary-color: var(--primary-600);
+    --secondary-color: var(--secondary-600);
+    --default-color: var(--neutral-50);
 
-    --header-text-color: #FFFFFF;
-    --header-bg-color: #e0e7ff;
-    --header-text-secondary-color: #2d3748;
+    --header-text-color: var(--neutral-50);
+    --header-bg-color: var(--primary-100);
+    --header-text-secondary-color: var(--neutral-800);
     
-    --nav-text-color: #FFFFFF;
-    --label-text-color: #4a5568;
+    --nav-text-color: var(--neutral-50);
+    --label-text-color: var(--neutral-600);
 
-    --border-color: #e2e8f0;
-    --border-secondary-color: #667eea;
-    --border-item-color: #48bb78;
-    --border-loading-color: #f3f3f3;
+    --border-color: var(--neutral-200);
+    --border-secondary-color: var(--primary-600);
+    --border-item-color: var(--success-500);
+    --border-loading-color: var(--neutral-100);
 
-    --bg-default-color: #FFFFFF;
-    --bg-secondary-color: #667eea;
-    --bg-tag-color: #48bb78;
-    --bg-tag-secondary-color: #38a169;
-    --bg-badge-color: #e2e8f0;
-    --bg-item-color: #f7fafc;
-    --bg-item-secondary-color: #edf2f7;
-    --bg-best-price-color: #f56565;
-    --bg-best-price-secondary-color: #e53e3e;
-    --bg-message-color: #48bb78;
-    --bg-message-secondary-color: #38a169;
-    --bg-message-error-color: #f56565;
-    --bg-message-error-secondary-color: #e53e3e;
+    --bg-default-color: var(--neutral-50);
+    --bg-secondary-color: var(--primary-600);
+    --bg-tag-color: var(--success-500);
+    --bg-tag-secondary-color: var(--success-600);
+    --bg-badge-color: var(--neutral-200);
+    --bg-item-color: var(--neutral-50);
+    --bg-item-secondary-color: var(--neutral-100);
+    --bg-best-price-color: var(--error-500);
+    --bg-best-price-secondary-color: var(--error-600);
+    --bg-message-color: var(--success-500);
+    --bg-message-secondary-color: var(--success-600);
+    --bg-message-error-color: var(--error-500);
+    --bg-message-error-secondary-color: var(--error-600);
     
-    --card-text-color: #2d3748;
-    --card-text-secondary-color: var(--label-text-color);
+    --card-text-color: var(--neutral-800);
+    --card-text-secondary-color: var(--neutral-600);
 
-    --badge-text-color: var(--label-text-color);
+    --badge-text-color: var(--neutral-600);
 
-    --state-text-color: #a0aec0;
-    
+    --state-text-color: var(--neutral-400);
 }
 
 * {
@@ -51,22 +55,47 @@ body {
     color: #333;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+/* ==========================================================================
+   Page Layout (Updated for new architecture)
+   ========================================================================== */
+
+.page-container {
+    padding-top: var(--space-4);
 }
 
+.page-header {
+    text-align: center;
+    margin-bottom: var(--space-8);
+    color: var(--header-text-color);
+}
+
+.page-header h1 {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-extrabold);
+    margin-bottom: var(--space-3);
+    text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    background: linear-gradient(45deg, var(--header-text-color), var(--header-bg-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-header p {
+    font-size: var(--text-lg);
+    opacity: 0.9;
+}
+
+/* Legacy header class for backward compatibility */
 .header {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: var(--space-10);
     color: var(--header-text-color);
 }
 
 .header h1 {
-    font-size: 3rem;
-    font-weight: 800;
-    margin-bottom: 10px;
+    font-size: var(--text-5xl);
+    font-weight: var(--font-extrabold);
+    margin-bottom: var(--space-3);
     text-shadow: 0 4px 15px rgba(0,0,0,0.3);
     background: linear-gradient(45deg, var(--header-text-color), var(--header-bg-color));
     -webkit-background-clip: text;
@@ -75,7 +104,7 @@ body {
 }
 
 .header p {
-    font-size: 1.2rem;
+    font-size: var(--text-xl);
     opacity: 0.9;
 }
 
