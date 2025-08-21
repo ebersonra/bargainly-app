@@ -10,7 +10,17 @@ function buildHandler(ctrl = controller) {
       return { statusCode: 405, body: 'Method Not Allowed' };
     }
     try {
-      const data = JSON.parse(event.body);
+      // Check if body is FormData (multipart) or JSON
+      let data;
+      if (event.headers && event.headers['content-type'] && event.headers['content-type'].includes('multipart/form-data')) {
+        // Handle FormData for file uploads
+        const base64Body = event.isBase64Encoded ? event.body : Buffer.from(event.body, 'binary').toString('base64');
+        data = { image: base64Body, contentType: event.headers['content-type'] };
+      } else {
+        // Handle JSON data
+        data = JSON.parse(event.body);
+      }
+      
       const result = await ctrl.processReceipt(data);
       return { statusCode: 200, body: JSON.stringify(result) };
     } catch (e) {

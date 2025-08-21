@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Compra - Barganha App</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>Registrar Compra</h1>
+            <p>Registre suas compras e acompanhe seus gastos</p>
+        </div>
+
+        <div class="page-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Nova Compra</h2>
+                </div>
+                <div class="card-body">
+                    <form id="purchaseForm">
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label for="purchaseAmount">Valor da Compra (R$)</label>
+                                <input type="number" id="purchaseAmount" name="amount" placeholder="Ex: 25.50" step="0.01" min="0" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="purchaseCategory">Categoria</label>
+                                <select id="purchaseCategory" name="category" required>
+                                    <option value="">Selecione uma categoria</option>
+                                    <option value="alimentacao">Alimentação</option>
+                                    <option value="limpeza">Limpeza</option>
+                                    <option value="higiene">Higiene</option>
+                                    <option value="bebidas">Bebidas</option>
+                                    <option value="padaria">Padaria</option>
+                                    <option value="acougue">Açougue</option>
+                                    <option value="hortifruti">Hortifruti</option>
+                                    <option value="outros">Outros</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="purchaseDate">Data da Compra</label>
+                                <input type="date" id="purchaseDate" name="date" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="purchaseMarket">Mercado (opcional)</label>
+                                <select id="purchaseMarket" name="market">
+                                    <option value="">Selecione um mercado</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="purchaseNotes">Observações (opcional)</label>
+                                <textarea id="purchaseNotes" name="notes" rows="3" placeholder="Descrição adicional da compra..."></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Registrar Compra</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- OCR Receipt Upload -->
+            <div class="card mt-8">
+                <div class="card-header">
+                    <h2>📷 Digitalizar Nota Fiscal</h2>
+                    <p class="text-sm text-neutral-600 mt-1">
+                        Tire uma foto da nota fiscal para extrair os dados automaticamente
+                    </p>
+                </div>
+                <div class="card-body">
+                    <div class="upload-area" id="receiptUploadArea">
+                        <div class="upload-content">
+                            <svg class="upload-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                                <path d="M14 2v6h6"/>
+                                <path d="M16 13a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                                <path d="M12 17v-4"/>
+                            </svg>
+                            <h3>Clique para enviar ou arraste a foto aqui</h3>
+                            <p>Formatos aceitos: JPG, PNG, WEBP</p>
+                        </div>
+                        <input type="file" id="receiptFileInput" accept="image/*" class="hidden">
+                    </div>
+                    
+                    <div id="ocrProgress" class="hidden mt-4">
+                        <div class="flex items-center gap-3">
+                            <div class="loading-spinner"></div>
+                            <span>Processando nota fiscal...</span>
+                        </div>
+                    </div>
+                    
+                    <div id="ocrResults" class="hidden mt-4">
+                        <h4 class="font-semibold mb-3">Itens encontrados:</h4>
+                        <div id="ocrItemsList" class="space-y-2">
+                            <!-- OCR results will be populated here -->
+                        </div>
+                        <div class="flex gap-3 mt-4">
+                            <button type="button" id="confirmOcrItems" class="btn btn-primary">
+                                Confirmar e Registrar
+                            </button>
+                            <button type="button" id="cancelOcr" class="btn btn-secondary">
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Purchases -->
+            <div class="card mt-8">
+                <div class="card-header">
+                    <div class="flex justify-between items-center">
+                        <h2>Compras Recentes</h2>
+                        <button type="button" id="refreshPurchases" class="btn btn-secondary btn-sm">
+                            🔄 Atualizar
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="recentPurchasesList">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                            </svg>
+                            <h3>Nenhuma compra registrada</h3>
+                            <p>Registre sua primeira compra para começar</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/static/js/mvc/components/Navigation.js"></script>
+    <script src="/static/js/mvc/controllers/BaseController.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/bargainly-app.js"></script>
+    <script src="/static/js/purchase-app.js"></script>
+
+    <script src="/static/js/purchaseController.js"></script>
+</body>
+</html>

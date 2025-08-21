@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metas e Orçamento - Barganha App</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>Metas e Orçamento</h1>
+            <p>Defina suas metas de gastos e acompanhe seu orçamento</p>
+        </div>
+
+        <div class="page-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Cadastrar Meta de Orçamento</h2>
+                </div>
+                <div class="card-body">
+                    <form id="budgetForm">
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label for="budgetCategory">Categoria</label>
+                                <select id="budgetCategory" name="category" required>
+                                    <option value="">Selecione uma categoria</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="budgetLimit">Limite Mensal (R$)</label>
+                                <input type="number" id="budgetLimit" name="limit" placeholder="Ex: 500.00" step="0.01" min="0" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="budgetMonth">Mês de Referência</label>
+                                <input type="month" id="budgetMonth" name="month" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Cadastrar Meta</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-8">
+                <div class="card-header">
+                    <div class="flex justify-between items-center">
+                        <h2>Minhas Metas</h2>
+                        <button type="button" id="refreshBudgets" class="btn btn-secondary btn-sm">
+                            🔄 Atualizar
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="budgetsList" class="space-y-4">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 11H7v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-9h-2v9H9v-9z"/>
+                                <path d="M13 2.05v3.03c3.39.49 6 3.39 6 6.92 0 .9-.18 1.75-.48 2.54l.8 1.67c.67-1.25 1.01-2.65 1.01-4.21 0-4.39-3.21-8.06-7.33-8.95zM9.37 5.28C7.16 6.91 5.5 9.62 5.5 12.75c0 1.56.34 2.96 1.01 4.21l.8-1.67c-.3-.79-.48-1.64-.48-2.54 0-3.53 2.61-6.43 6-6.92V2.05c-4.12.89-7.33 4.56-7.33 8.95z"/>
+                            </svg>
+                            <h3>Nenhuma meta cadastrada</h3>
+                            <p>Cadastre suas primeiras metas de orçamento</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget Summary -->
+            <div class="card mt-8">
+                <div class="card-header">
+                    <h2>Resumo do Mês</h2>
+                </div>
+                <div class="card-body">
+                    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <div class="stat-card">
+                            <div class="stat-title">Total Orçado</div>
+                            <div class="stat-value text-primary-600" id="totalBudget">R$ 0,00</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Total Gasto</div>
+                            <div class="stat-value text-error-600" id="totalSpent">R$ 0,00</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Restante</div>
+                            <div class="stat-value text-success-600" id="totalRemaining">R$ 0,00</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">% Utilizado</div>
+                            <div class="stat-value" id="totalPercentage">0%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/static/js/mvc/components/Navigation.js"></script>
+    <script src="/static/js/mvc/controllers/BaseController.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/bargainly-app.js"></script>
+    <script src="/static/js/budgets-app.js"></script>
+
+    <script>
+        // Goals page specific controller
+        class GoalsController extends BaseController {
+            constructor() {
+                super();
+                this.init();
+            }
+
+            init() {
+                this.setCurrentMonth();
+                this.loadBudgets();
+                this.setupEventListeners();
+            }
+
+            setCurrentMonth() {
+                const now = new Date();
+                const currentMonth = now.toISOString().slice(0, 7); // YYYY-MM format
+                document.getElementById('budgetMonth').value = currentMonth;
+            }
+
+            setupEventListeners() {
+                const form = document.getElementById('budgetForm');
+                this.handleFormSubmission(form, (data) => this.createBudget(data));
+
+                document.getElementById('refreshBudgets')?.addEventListener('click', () => {
+                    this.loadBudgets();
+                });
+            }
+
+            async createBudget(data) {
+                try {
+                    const userId = this.getUserIdFromCookie();
+                    if (!userId) {
+                        throw new Error('Usuário não autenticado');
+                    }
+
+                    // Use existing budget functionality if available
+                    if (typeof window.submitBudget === 'function') {
+                        await window.submitBudget({
+                            user_id: userId,
+                            category: data.category,
+                            limit: parseFloat(data.limit),
+                            month: data.month
+                        });
+                    }
+
+                    this.showSuccess('Meta cadastrada com sucesso!', document.getElementById('budgetForm').parentElement);
+                    document.getElementById('budgetForm').reset();
+                    this.setCurrentMonth();
+                    await this.loadBudgets();
+                } catch (error) {
+                    throw new Error('Erro ao cadastrar meta: ' + error.message);
+                }
+            }
+
+            async loadBudgets() {
+                const container = document.getElementById('budgetsList');
+                this.showLoading(container);
+
+                try {
+                    // Use existing budget loading if available
+                    if (typeof window.loadBudgets === 'function') {
+                        await window.loadBudgets();
+                    }
+                    await this.updateBudgetSummary();
+                } catch (error) {
+                    this.showError('Erro ao carregar metas: ' + error.message, container.parentElement);
+                } finally {
+                    this.hideLoading(container);
+                }
+            }
+
+            async updateBudgetSummary() {
+                try {
+                    const userId = this.getUserIdFromCookie();
+                    if (!userId) return;
+
+                    // Calculate totals from budget data
+                    const budgetElements = document.querySelectorAll('#budgetsList .budget-item');
+                    let totalBudget = 0;
+                    let totalSpent = 0;
+
+                    budgetElements.forEach(element => {
+                        const budget = parseFloat(element.dataset.budget || '0');
+                        const spent = parseFloat(element.dataset.spent || '0');
+                        totalBudget += budget;
+                        totalSpent += spent;
+                    });
+
+                    const totalRemaining = totalBudget - totalSpent;
+                    const totalPercentage = totalBudget > 0 ? (totalSpent / totalBudget * 100).toFixed(1) : 0;
+
+                    // Update summary display
+                    document.getElementById('totalBudget').textContent = this.formatCurrency(totalBudget);
+                    document.getElementById('totalSpent').textContent = this.formatCurrency(totalSpent);
+                    document.getElementById('totalRemaining').textContent = this.formatCurrency(totalRemaining);
+                    document.getElementById('totalPercentage').textContent = totalPercentage + '%';
+
+                    // Update percentage color
+                    const percentageElement = document.getElementById('totalPercentage');
+                    percentageElement.className = 'stat-value';
+                    if (totalPercentage > 100) {
+                        percentageElement.classList.add('text-error-600');
+                    } else if (totalPercentage > 80) {
+                        percentageElement.classList.add('text-warning-600');
+                    } else {
+                        percentageElement.classList.add('text-success-600');
+                    }
+
+                } catch (error) {
+                    console.error('Erro ao atualizar resumo:', error);
+                }
+            }
+
+            formatCurrency(value) {
+                return new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                }).format(value);
+            }
+        }
+
+        // Initialize goals controller when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new GoalsController();
+        });
+    </script>
+
+    <style>
+        .stat-card {
+            background: var(--neutral-50);
+            border: 1px solid var(--neutral-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            text-align: center;
+        }
+
+        .stat-title {
+            font-size: var(--text-sm);
+            font-weight: var(--font-medium);
+            color: var(--neutral-600);
+            margin-bottom: var(--space-2);
+        }
+
+        .stat-value {
+            font-size: var(--text-2xl);
+            font-weight: var(--font-bold);
+            color: var(--neutral-800);
+        }
+
+        .budget-item {
+            background: var(--neutral-50);
+            border: 1px solid var(--neutral-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            margin-bottom: var(--space-4);
+        }
+
+        .budget-progress {
+            background: var(--neutral-200);
+            border-radius: var(--radius-full);
+            height: 8px;
+            overflow: hidden;
+            margin: var(--space-2) 0;
+        }
+
+        .budget-progress-bar {
+            height: 100%;
+            transition: width var(--transition-base);
+            border-radius: var(--radius-full);
+        }
+
+        .budget-progress-bar.safe {
+            background: var(--success-500);
+        }
+
+        .budget-progress-bar.warning {
+            background: var(--warning-500);
+        }
+
+        .budget-progress-bar.danger {
+            background: var(--error-500);
+        }
+    </style>
+</body>
+</html>

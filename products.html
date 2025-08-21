@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos - Barganha App</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>Produtos</h1>
+            <p>Cadastre produtos e encontre os melhores preços</p>
+        </div>
+
+        <div class="page-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Cadastrar Produto</h2>
+                </div>
+                <div class="card-body">
+                    <form id="produtoForm">
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <div id="cameraContainer"></div>
+                                <label for="codigoBarras">Código de Barras (GTIN)</label>
+                                <input type="text" id="codigoBarras" name="codigoBarras" placeholder="Digite o código de barras">
+                                <div class="flex gap-2 mt-2">
+                                    <button type="button" id="buscarProduto" class="btn btn-secondary btn-sm">
+                                        🔍 Buscar Produto
+                                    </button>
+                                    <button type="button" id="abrirCamera" class="btn btn-secondary btn-sm">
+                                        📷 Ler Código
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="produtoMercado">Mercado</label>
+                                <select id="produtoMercado" name="mercado" required>
+                                    <option value="">Selecione um mercado</option>
+                                </select>
+                            </div>
+                            
+                            <div class="input-group">
+                                <div class="product-container flex justify-center items-center">
+                                    <img id="thumbnail" class="product-thumbnail" src="/static/img/products/prod_ind_v1.webp" alt="Produto">
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="produtoNome">Nome do Produto</label>
+                                <input type="text" id="produtoNome" name="nome" required>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="produtoUnidade">Tipo Embalagem</label>
+                                <select id="produtoUnidade" name="unidade" required>
+                                    <option value="">Selecione a unidade</option>
+                                    <option value="kg">Quilograma (kg)</option>
+                                    <option value="g">Grama (g)</option>
+                                    <option value="l">Litro (l)</option>
+                                    <option value="ml">Mililitro (ml)</option>
+                                    <option value="un">Unidade (un)</option>
+                                    <option value="cx">Caixa (cx)</option>
+                                    <option value="pct">Pacote (pct)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="produtoValor">Valor (R$)</label>
+                                <input type="number" id="produtoValor" name="valor" step="0.01" min="0" required>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="produtoCategoria">Categoria</label>
+                                <input type="text" id="produtoCategoria" name="categoria" required>
+                            </div>
+                            
+                            <div class="input-group">
+                                <div class="product-container flex justify-center items-center">
+                                    <img id="barcode" class="product-barcode" src="/static/img/products/prod_ind_v1.webp" alt="Barcode">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Cadastrar Produto</button>
+                    </form>
+                    
+                    <div id="loadingMessage" class="loading hidden"></div>
+                    <div id="successMessage" class="success-message hidden"></div>
+                    <div id="errorMessage" class="error-message hidden"></div>
+                    <div id="productInfo" class="product-info mt-4 hidden">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Informações do Produto</h4>
+                            </div>
+                            <div class="card-body" id="productInfoContent">
+                                <!-- Product info will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-8">
+                <div class="card-header">
+                    <h2>Produtos Cadastrados</h2>
+                </div>
+                <div class="card-body">
+                    <div id="produtosList" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M7 4V2a1 1 0 0 1 2 0v2h6V2a1 1 0 0 1 2 0v2h1a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h1zm0 2H6a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-1v1a1 1 0 0 1-2 0V6H9v1a1 1 0 0 1-2 0V6z"/>
+                            </svg>
+                            <h3>Nenhum produto cadastrado</h3>
+                            <p>Cadastre produtos para aparecerem na barganha</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.min.js"></script>
+    <script src="/static/js/mvc/components/Navigation.js"></script>
+    <script src="/static/js/mvc/controllers/BaseController.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/bargainly-app.js"></script>
+    <script src="/static/js/products-app.js"></script>
+    <script src="/static/js/barcode-scanner.js"></script>
+</body>
+</html>

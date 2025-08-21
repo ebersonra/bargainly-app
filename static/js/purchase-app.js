@@ -1,3 +1,16 @@
+// Initialize page data
+async function initializePurchasePage() {
+    try {
+        // Populate market select
+        populateMarketSelect('purchaseMarket');
+        
+        // Populate category select
+        populateCategorySelect('purchaseCategory');
+    } catch (error) {
+        console.error('Erro ao inicializar página de compras:', error);
+    }
+}
+
 async function submitPurchaseForm(e) {
   e.preventDefault();
   
@@ -21,3 +34,6 @@ async function submitPurchaseForm(e) {
 }
 
 document.getElementById('purchaseForm')?.addEventListener('submit', submitPurchaseForm);
+
+// Initialize page when DOM is loaded
+document.addEventListener('DOMContentLoaded', initializePurchasePage);

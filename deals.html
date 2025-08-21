@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ofertas - Barganha App</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>🔥 Melhores Ofertas</h1>
+            <p>Produtos com os menores preços de cada mercado</p>
+        </div>
+
+        <div class="page-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Filtros</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label for="filterCategory">Categoria</label>
+                            <select id="filterCategory" name="category">
+                                <option value="">Todas as categorias</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="filterMarket">Mercado</label>
+                            <select id="filterMarket" name="market">
+                                <option value="">Todos os mercados</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="filterMaxPrice">Preço máximo</label>
+                            <input type="number" id="filterMaxPrice" name="maxPrice" step="0.01" min="0" placeholder="Ex: 10.00">
+                        </div>
+                    </div>
+                    <div class="flex gap-3 mt-4">
+                        <button type="button" id="applyFilters" class="btn btn-primary">
+                            Aplicar Filtros
+                        </button>
+                        <button type="button" id="clearFilters" class="btn btn-secondary">
+                            Limpar Filtros
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-8">
+                <div class="card-header">
+                    <div class="flex justify-between items-center">
+                        <h2>Ofertas Disponíveis</h2>
+                        <div class="text-sm text-neutral-600">
+                            <span id="offersCount">0</span> ofertas encontradas
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="barganhaList" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                            <h3>Nenhuma barganha disponível</h3>
+                            <p>Cadastre mercados e produtos para ver as melhores ofertas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Best Deal of the Day -->
+            <div id="bestDealCard" class="card mt-8 hidden">
+                <div class="card-header bg-gradient-to-r from-red-500 to-red-600 text-white">
+                    <h2 class="flex items-center gap-2">
+                        🏆 Oferta do Dia
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div id="bestDealContent">
+                        <!-- Best deal content will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/static/js/mvc/components/Navigation.js"></script>
+    <script src="/static/js/mvc/controllers/BaseController.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/bargainly-app.js"></script>
+    <script src="/static/js/dealsController.js"></script>
+</body>
+</html>

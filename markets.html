@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mercados - Barganha App</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>Mercados</h1>
+            <p>Cadastre e gerencie os mercados onde você faz compras</p>
+        </div>
+
+        <div class="page-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Cadastrar Mercado</h2>
+                </div>
+                <div class="card-body">
+                    <form id="mercadoForm">
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label for="mercadoCNPJ">CNPJ</label>
+                                <input type="text" id="mercadoCNPJ" name="cnpj" placeholder="Digite o CNPJ" required>
+                                <button type="button" id="buscarMercado" class="btn btn-secondary btn-sm mt-2">
+                                    🔍 Buscar Mercado
+                                </button>
+                            </div>
+                            <div class="input-group">
+                                <label for="mercadoNome">Razão Social</label>
+                                <input type="text" id="mercadoNome" name="nome" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="nomeFantasia">Nome Fantasia</label>
+                                <input type="text" id="nomeFantasia" name="nomeFantasia" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="mercadoEndereco">Endereço</label>
+                                <input type="text" id="mercadoEndereco" name="endereco" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Cadastrar Mercado</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-8">
+                <div class="card-header">
+                    <h2>Mercados Cadastrados</h2>
+                </div>
+                <div class="card-body">
+                    <div id="mercadosList" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1zM10 6a2 2 0 0 1 4 0v1h-4V6zm8 15a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9h2v1a1 1 0 0 0 2 0V9h4v1a1 1 0 0 0 2 0V9h2v12z"/>
+                            </svg>
+                            <h3>Nenhum mercado cadastrado</h3>
+                            <p>Cadastre o primeiro mercado para começar</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/static/js/mvc/components/Navigation.js"></script>
+    <script src="/static/js/mvc/controllers/BaseController.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/bargainly-app.js"></script>
+    <script src="/static/js/markets-app.js"></script>
+</body>
+</html>

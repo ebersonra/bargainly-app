@@ -195,3 +195,106 @@ function extrairDadosGTINs(data) {
       };
     });
 }
+
+// Shared function to load markets
+async function loadMarkets() {
+    try {
+        const response = await fetch('/.netlify/functions/get-markets', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            console.error('Erro ao buscar mercados:', response.statusText);
+            return [];
+        }
+        
+        const result = await response.json();
+        
+        if (!Array.isArray(result)) {
+            console.error('Formato inválido de resposta dos mercados');
+            return [];
+        }
+
+        return result.map(market => ({
+            id: market.id,
+            nome: market.name,
+            endereco: market.address,
+            cnpj: market.cnpj || null
+        }));
+    } catch (error) {
+        console.error('Erro ao carregar mercados:', error);
+        return [];
+    }
+}
+
+// Shared function to populate market select
+async function populateMarketSelect(selectId, includeEmpty = true) {
+    const select = document.getElementById(selectId);
+    if (!select) {
+        console.error(`Select element with id '${selectId}' not found`);
+        return;
+    }
+
+    try {
+        const markets = await loadMarkets();
+        
+        let options = '';
+        if (includeEmpty) {
+            options += '<option value="">Selecione um mercado</option>';
+        }
+        
+        options += markets.map(market => 
+            `<option value="${market.id}">${market.nome} / ${market.endereco}</option>`
+        ).join('');
+        
+        select.innerHTML = options;
+    } catch (error) {
+        console.error('Erro ao popular select de mercados:', error);
+        select.innerHTML = '<option value="">Erro ao carregar mercados</option>';
+    }
+}
+
+// Shared function to get categories
+function getCategories() {
+    return [
+        'Bebidas',
+        'Açougue',
+        'Padaria', 
+        'Laticínios',
+        'Mercearia',
+        'Higiene',
+        'Limpeza',
+        'Frutas',
+        'Verduras e Legumes',
+        'Congelados',
+        'Doces e Sobremesas',
+        'Café e Cereais Matinais',
+        'Enlatados e Conservas',
+        'Outros'
+    ];
+}
+
+// Shared function to populate category select
+function populateCategorySelect(selectId, includeEmpty = true) {
+    const select = document.getElementById(selectId);
+    if (!select) {
+        console.error(`Select element with id '${selectId}' not found`);
+        return;
+    }
+
+    const categories = getCategories();
+    
+    let options = '';
+    if (includeEmpty) {
+        options += '<option value="">Selecione uma categoria</option>';
+    }
+    
+    options += categories.map(category => 
+        `<option value="${category}">${category}</option>`
+    ).join('');
+    
+    select.innerHTML = options;
+}

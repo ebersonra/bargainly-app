@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Barganha App</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>Dashboard</h1>
+            <p>Visão geral dos seus gastos e economia</p>
+        </div>
+
+        <div class="page-content">
+            <!-- Summary Cards -->
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-title">Gasto Total</div>
+                    <div class="stat-value text-error-600" id="totalSpent">R$ 0,00</div>
+                    <div class="stat-change" id="spentChange">+0% este mês</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-title">Meta do Mês</div>
+                    <div class="stat-value text-primary-600" id="monthlyGoal">R$ 0,00</div>
+                    <div class="stat-change" id="goalProgress">0% atingido</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💡</div>
+                    <div class="stat-title">Economia</div>
+                    <div class="stat-value text-success-600" id="totalSavings">R$ 0,00</div>
+                    <div class="stat-change" id="savingsChange">+0% este mês</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏪</div>
+                    <div class="stat-title">Mercados</div>
+                    <div class="stat-value text-neutral-700" id="marketsCount">0</div>
+                    <div class="stat-change" id="productsCount">0 produtos</div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="grid gap-6 lg:grid-cols-2 mb-8">
+                <!-- Spending by Category -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Gastos por Categoria</h3>
+                        <select id="categoryPeriod" class="text-sm border border-neutral-300 rounded px-2 py-1">
+                            <option value="month">Este mês</option>
+                            <option value="quarter">Últimos 3 meses</option>
+                            <option value="year">Este ano</option>
+                        </select>
+                    </div>
+                    <div class="card-body">
+                        <div id="categoryChart" class="chart-container">
+                            <div class="empty-chart">
+                                <span>📊</span>
+                                <p>Nenhum dado disponível</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spending Trend -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Tendência de Gastos</h3>
+                        <select id="trendPeriod" class="text-sm border border-neutral-300 rounded px-2 py-1">
+                            <option value="week">Últimas semanas</option>
+                            <option value="month">Últimos meses</option>
+                        </select>
+                    </div>
+                    <div class="card-body">
+                        <div id="trendChart" class="chart-container">
+                            <div class="empty-chart">
+                                <span>📈</span>
+                                <p>Nenhum dado disponível</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="grid gap-6 lg:grid-cols-3 mb-8">
+                <!-- Recent Purchases -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Compras Recentes</h3>
+                        <a href="/purchase.html" class="text-sm text-primary-600 hover:text-primary-700">Ver todas</a>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentPurchases" class="space-y-3">
+                            <div class="empty-state-sm">
+                                <span>🛒</span>
+                                <p>Nenhuma compra recente</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Markets -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Mercados Favoritos</h3>
+                        <a href="/markets.html" class="text-sm text-primary-600 hover:text-primary-700">Ver todos</a>
+                    </div>
+                    <div class="card-body">
+                        <div id="topMarkets" class="space-y-3">
+                            <div class="empty-state-sm">
+                                <span>🏪</span>
+                                <p>Nenhum mercado cadastrado</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Best Deals -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Melhores Ofertas</h3>
+                        <a href="/deals.html" class="text-sm text-primary-600 hover:text-primary-700">Ver todas</a>
+                    </div>
+                    <div class="card-body">
+                        <div id="bestDeals" class="space-y-3">
+                            <div class="empty-state-sm">
+                                <span>🔥</span>
+                                <p>Nenhuma oferta disponível</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget Progress -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Progresso das Metas</h3>
+                    <a href="/goals.html" class="text-sm text-primary-600 hover:text-primary-700">Gerenciar metas</a>
+                </div>
+                <div class="card-body">
+                    <div id="budgetProgress" class="space-y-4">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 11H7v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-9h-2v9H9v-9z"/>
+                                <path d="M13 2.05v3.03c3.39.49 6 3.39 6 6.92 0 .9-.18 1.75-.48 2.54l.8 1.67c.67-1.25 1.01-2.65 1.01-4.21 0-4.39-3.21-8.06-7.33-8.95zM9.37 5.28C7.16 6.91 5.5 9.62 5.5 12.75c0 1.56.34 2.96 1.01 4.21l.8-1.67c-.3-.79-.48-1.64-.48-2.54 0-3.53 2.61-6.43 6-6.92V2.05c-4.12.89-7.33 4.56-7.33 8.95z"/>
+                            </svg>
+                            <h3>Nenhuma meta cadastrada</h3>
+                            <p>Defina suas metas de orçamento para acompanhar o progresso</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/static/js/mvc/components/Navigation.js"></script>
+    <script src="/static/js/mvc/controllers/BaseController.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/bargainly-app.js"></script>
+    <script src="/static/js/dashboard-app.js"></script>
+
+
+</body>
+</html>

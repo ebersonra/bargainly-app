@@ -4,208 +4,141 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barganha App - Encontre os Melhores Preços</title>
-    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Barganha App</h1>
+        <div class="page-header">
+            <h1>Bem-vindo ao Barganha App</h1>
             <p>Encontre os melhores preços e economize nas suas compras</p>
         </div>
 
-        <div class="nav-tabs">
-            <button class="nav-tab active" onclick="showTab('mercados')">Mercados</button>
-            <button class="nav-tab" onclick="showTab('produtos')">Produtos</button>
-            <button class="nav-tab" onclick="showTab('barganha')">🔥 Barganha</button>
-            <button class="nav-tab" onclick="showTab('metas')">Metas</button>
-            <button class="nav-tab" onclick="showTab('compra')">Registrar Compra</button>
-            <button class="nav-tab" onclick="showTab('dashboard')">Dashboard</button>
-        </div>
-
-        <!-- Tab Mercados -->
-        <div id="mercados" class="tab-content active">
-            <h2 style="margin-bottom: 20px; color: #2d3748;">Cadastrar Mercado</h2>
-            <form id="mercadoForm">
-                <div class="form-grid">
-                    <div class="input-group">
-                        <label for="mercadoCNPJ">CNPJ</label>
-                        <input type="text" id="mercadoCNPJ" placeholder="Digite o CNPJ" required>
-                        <button type="button" id="buscarMercado" class="btn" style="margin-top: 10px; padding: 10px 15px; font-size: 14px;">🔍 Buscar Mercado</button>
-                    </div>
-                    <div class="input-group">
-                        <label for="mercadoNome">Razão Social</label>
-                        <input type="text" id="mercadoNome" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="nomeFantasia">Nome fantasia</label>
-                        <input type="text" id="nomeFantasia" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="mercadoEndereco">Endereço</label>
-                        <input type="text" id="mercadoEndereco" required>
-                    </div>
+        <div class="page-content">
+            <!-- Quick Actions -->
+            <div class="card mb-8">
+                <div class="card-header">
+                    <h2>Ações Rápidas</h2>
                 </div>
-                <button type="submit" class="btn">Cadastrar Mercado</button>
-            </form>
-
-            <div class="items-grid" id="mercadosList">
-                <div class="empty-state">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1zM10 6a2 2 0 0 1 4 0v1h-4V6zm8 15a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9h2v1a1 1 0 0 0 2 0V9h4v1a1 1 0 0 0 2 0V9h2v12z"/>
-                    </svg>
-                    <h3>Nenhum mercado cadastrado</h3>
-                    <p>Cadastre o primeiro mercado para começar</p>
+                <div class="card-body">
+                    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <a href="/purchase.html" class="quick-action-card">
+                            <div class="quick-action-icon">📝</div>
+                            <h3>Registrar Compra</h3>
+                            <p>Registre uma nova compra rapidamente</p>
+                        </a>
+                        <a href="/deals.html" class="quick-action-card">
+                            <div class="quick-action-icon">🔥</div>
+                            <h3>Ver Ofertas</h3>
+                            <p>Encontre as melhores ofertas disponíveis</p>
+                        </a>
+                        <a href="/goals.html" class="quick-action-card">
+                            <div class="quick-action-icon">🎯</div>
+                            <h3>Minhas Metas</h3>
+                            <p>Acompanhe suas metas de orçamento</p>
+                        </a>
+                        <a href="/products.html" class="quick-action-card">
+                            <div class="quick-action-icon">📦</div>
+                            <h3>Produtos</h3>
+                            <p>Cadastre e gerencie produtos</p>
+                        </a>
+                        <a href="/markets.html" class="quick-action-card">
+                            <div class="quick-action-icon">🏪</div>
+                            <h3>Mercados</h3>
+                            <p>Gerencie seus mercados favoritos</p>
+                        </a>
+                        <a href="/dashboard.html" class="quick-action-card">
+                            <div class="quick-action-icon">📊</div>
+                            <h3>Dashboard</h3>
+                            <p>Veja relatórios e estatísticas</p>
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Tab Produtos -->
-        <div id="produtos" class="tab-content">
-            <h2 style="margin-bottom: 20px; color: #2d3748;">Cadastrar Produto</h2>
-            <form id="produtoForm">
-                <div class="form-grid">
-                    <div class="input-group">
-                        <div id="cameraContainer"></div>
-                        <label for="codigoBarras">Código de Barras (GTIN)</label>
-                        <input type="text" id="codigoBarras" placeholder="Digite o código de barras">
-                        <button type="button" id="buscarProduto" class="btn" style="margin-top: 10px; padding: 10px 15px; font-size: 14px;">🔍 Buscar Produto</button>
-                        <button type="button" id="abrirCamera" class="btn" style="margin-top: 10px; padding: 10px 15px; font-size: 14px;">📷 Ler Código</button>     
+            <!-- Recent Activity Summary -->
+            <div class="grid gap-6 lg:grid-cols-2">
+                <!-- Recent Purchases -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Últimas Compras</h3>
+                        <a href="/purchase.html" class="text-sm text-primary-600 hover:text-primary-700">Ver todas</a>
                     </div>
-                    <div class="input-group">
-                        <label for="produtoMercado">Mercado</label>
-                        <select id="produtoMercado" required>
-                            <option value="">Selecione um mercado</option>
-                        </select>
-                    </div>
-                    <div class="product-container">
-                        <img id="thumbnail" class="product-thumbnail" src="static/img/products/prod_ind_v1.webp" alt="Produto">
-                    </div>
-                    
-                    <div class="input-group">
-                        <label for="produtoNome">Nome do Produto</label>
-                        <input type="text" id="produtoNome" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="produtoUnidade">Tipo Embalagem</label>
-                        <select id="produtoUnidade" required>
-                            <option value="">Selecione a unidade</option>
-                            <option value="kg">Quilograma (kg)</option>
-                            <option value="g">Grama (g)</option>
-                            <option value="l">Litro (l)</option>
-                            <option value="ml">Mililitro (ml)</option>
-                            <option value="un">Unidade (un)</option>
-                            <option value="cx">Caixa (cx)</option>
-                            <option value="pct">Pacote (pct)</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label for="produtoValor">Valor (R$)</label>
-                        <input type="number" id="produtoValor" step="0.01" min="0" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="produtoCategoria">Categoria</label>
-                        <input type="text" id="produtoCategoria" required>
-                    </div>
-                    <div class="product-container">
-                        <img id="barcode" class="product-barcode" src="static/img/products/prod_ind_v1.webp" alt="Barcode">
+                    <div class="card-body">
+                        <div id="homeRecentPurchases">
+                            <div class="empty-state-sm">
+                                <span>🛒</span>
+                                <p>Nenhuma compra recente</p>
+                                <a href="/purchase.html" class="btn btn-primary btn-sm mt-3">Registrar primeira compra</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <button type="submit" class="btn">Cadastrar Produto</button>
-            </form>
-            <div id="loadingMessage" class="loading" style="display:none;"></div>
-            <div id="successMessage" class="success-message"></div>
-            <div id="errorMessage" class="error-message"></div>
-            <div id="productInfo" class="product-info"></div>
-
-            <div class="items-grid" id="produtosList">
-                <div class="empty-state">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M7 4V2a1 1 0 0 1 2 0v2h6V2a1 1 0 0 1 2 0v2h1a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h1zm0 2H6a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-1v1a1 1 0 0 1-2 0V6H9v1a1 1 0 0 1-2 0V6z"/>
-                    </svg>
-                    <h3>Nenhum produto cadastrado</h3>
-                    <p>Cadastre produtos para aparecerem na barganha</p>
+                <!-- Best Deals -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Ofertas em Destaque</h3>
+                        <a href="/deals.html" class="text-sm text-primary-600 hover:text-primary-700">Ver todas</a>
+                    </div>
+                    <div class="card-body">
+                        <div id="homeBestDeals">
+                            <div class="empty-state-sm">
+                                <span>🔥</span>
+                                <p>Nenhuma oferta disponível</p>
+                                <a href="/products.html" class="btn btn-primary btn-sm mt-3">Cadastrar produtos</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Tab Barganha -->
-        <div id="barganha" class="tab-content">
-            <div class="bargain-header">
-                <h2>🔥 Melhores Ofertas</h2>
-                <p style="color: #4a5568;">Produtos com os menores preços de cada mercado</p>
-            </div>
-            <div id="barganhaList">
-                <div class="empty-state">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                    </svg>
-                    <h3>Nenhuma barganha disponível</h3>
-                    <p>Cadastre mercados e produtos para ver as melhores ofertas</p>
+            <!-- Getting Started Guide -->
+            <div class="card mt-8" id="gettingStartedCard">
+                <div class="card-header">
+                    <h3>Como começar</h3>
+                </div>
+                <div class="card-body">
+                    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <div class="step-card">
+                            <div class="step-number">1</div>
+                            <h4>Cadastre Mercados</h4>
+                            <p>Adicione os mercados onde você costuma fazer compras</p>
+                            <a href="/markets.html" class="btn btn-secondary btn-sm mt-2">Cadastrar</a>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-number">2</div>
+                            <h4>Adicione Produtos</h4>
+                            <p>Cadastre produtos com seus preços em diferentes mercados</p>
+                            <a href="/products.html" class="btn btn-secondary btn-sm mt-2">Adicionar</a>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-number">3</div>
+                            <h4>Defina Metas</h4>
+                            <p>Estabeleça metas de orçamento para controlar seus gastos</p>
+                            <a href="/goals.html" class="btn btn-secondary btn-sm mt-2">Definir</a>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-number">4</div>
+                            <h4>Registre Compras</h4>
+                            <p>Acompanhe seus gastos registrando suas compras</p>
+                            <a href="/purchase.html" class="btn btn-secondary btn-sm mt-2">Registrar</a>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Tab Metas -->
-        <div id="metas" class="tab-content">
-            <h2>Metas e Orçamento</h2>
-            <form id="budgetForm">
-                <div class="form-grid">
-                    <div class="input-group">
-                        <label for="budgetCategory">Categoria</label>
-                        <input type="text" id="budgetCategory" placeholder="Categoria" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="budgetLimit">Limite</label>
-                        <input type="number" id="budgetLimit" placeholder="Limite" required>
-                    </div>
-                </div>
-                <button type="submit" class="btn">Cadastrar Categoria</button>
-            </form>
-            <div id="budgetsList" class="items-grid"></div>
-        </div>
-
-        <!-- Tab Registrar Compra -->
-        <div id="compra" class="tab-content">
-            <h2>Registrar Compra</h2>
-            <form id="purchaseForm">
-                <div class="form-grid">
-                    <div class="input-group">
-                        <label for="purchaseAmount">Valor da Compra</label>
-                        <input type="number" id="purchaseAmount" placeholder="Valor" step="0.01" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="purchaseCategory">Categoria</label>
-                        <input type="text" id="purchaseCategory" placeholder="Categoria" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="purchaseDate">Data da Compra</label>
-                        <input type="date" id="purchaseDate" required>
-                    </div>
-                </div>
-                <button type="submit" class="btn">Registrar</button>
-            </form>
-        </div>
-
-        <!-- Tab Dashboard -->
-        <div id="dashboard" class="tab-content">
-            <h2>Dashboard</h2>
-            <div id="dashboardList" class="items-grid"></div>
         </div>
     </div>
 
-    <!-- index.html -->
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.min.js"></script>
+    <script src="/static/js/mvc/components/Navigation.js"></script>
+    <script src="/static/js/mvc/controllers/BaseController.js"></script>
+    <script src="/static/js/auth.js"></script>
     <script src="/static/js/utils.js"></script>
     <script src="/static/js/bargainly-app.js"></script>
-    <script src="/static/js/products-app.js"></script>
-    <script src="/static/js/markets-app.js"></script>
-    <script src="/static/js/barcode-scanner.js"></script>
-    <script src="/static/js/tabs-app.js"></script>
-    <script src="/static/js/budgets-app.js"></script>
-    <script src="/static/js/purchase-app.js"></script>
-    <script src="/static/js/dashboard-app.js"></script>
+
+    <script src="/static/js/homeController.js"></script>
+
 
 </body>
 </html>

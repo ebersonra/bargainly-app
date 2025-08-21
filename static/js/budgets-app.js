@@ -61,4 +61,10 @@ async function submitBudgetForm(e) {
 
 document.getElementById('budgetForm')?.addEventListener('submit', submitBudgetForm);
 
-document.addEventListener('DOMContentLoaded', loadBudgets);
+document.addEventListener('DOMContentLoaded', () => {
+  // Populate category select if it exists
+  populateCategorySelect('budgetCategory', false);
+  
+  // Load existing budgets
+  loadBudgets();
+});
