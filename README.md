@@ -63,7 +63,7 @@ npm run test:watch
 ### CI/CD
 Os testes são executados automaticamente no GitHub Actions:
 - Em todo pull request
-- Em pushes para as branches `main` e `develop`
+- Em pushes para a branch `main`
 - O deploy é bloqueado se algum teste falhar
 
 ---
