@@ -4,8 +4,8 @@ async function initializePurchasePage() {
         // Populate market select
         populateMarketSelect('purchaseMarket');
         
-        // Populate category select
-        populateCategorySelect('purchaseCategory');
+        // Populate category select with user's categories from database
+        await populatePurchaseCategorySelect('purchaseCategory');
     } catch (error) {
         console.error('Erro ao inicializar página de compras:', error);
     }
@@ -17,7 +17,7 @@ async function submitPurchaseForm(e) {
   const user_id = await getUserId();
   
   if (!user_id) {
-      showMessage('Erro: usuário não identificado', 'error');
+      console.error('Erro: usuário não identificado');
       return;
   }
 
@@ -26,7 +26,7 @@ async function submitPurchaseForm(e) {
   const date = document.getElementById('purchaseDate').value;
 
   try {
-    showMessage('Registrando compra...', 'loading');
+    console.log('Registrando compra...');
     
     const response = await fetch('/.netlify/functions/insert-purchase-record', {
       method: 'POST',
@@ -43,11 +43,10 @@ async function submitPurchaseForm(e) {
 
     const result = await response.json();
     e.target.reset();
-    showMessage('Compra registrada com sucesso!', 'success');
+    console.log('Compra registrada com sucesso!', result);
     
   } catch (error) {
     console.error('Erro ao registrar compra:', error);
-    showMessage(`Erro ao registrar compra: ${error.message}`, 'error');
   }
 }
 

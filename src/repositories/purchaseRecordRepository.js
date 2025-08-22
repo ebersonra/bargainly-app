@@ -73,4 +73,50 @@ async function fetchTotalSpent(user_id) {
   }));
 }
 
-module.exports = { insertPurchaseRecord, fetchBudgets, fetchTotalSpent, upsertBudget };
+async function fetchPurchaseCategories(user_id) {
+  const supabase = getClient();
+  const { data, error } = await supabase
+    .from('purchase_categories')
+    .select('id, name')
+    .eq('user_id', user_id)
+    .order('name');
+  if (error) throw new Error(error.message);
+  return data || [];
+}
+
+async function seedDefaultCategories(user_id) {
+  const supabase = getClient();
+  
+  // Check if user already has categories
+  const existing = await fetchPurchaseCategories(user_id);
+  if (existing.length > 0) {
+    return existing;
+  }
+  
+  // Default categories to seed
+  const defaultCategories = [
+    'Alimentação',
+    'Limpeza', 
+    'Higiene',
+    'Bebidas',
+    'Padaria',
+    'Açougue',
+    'Hortifruti',
+    'Outros'
+  ];
+  
+  const categoriesToInsert = defaultCategories.map(name => ({
+    name,
+    user_id
+  }));
+  
+  const { data, error } = await supabase
+    .from('purchase_categories')
+    .insert(categoriesToInsert)
+    .select('id, name');
+  
+  if (error) throw new Error(error.message);
+  return data || [];
+}
+
+module.exports = { insertPurchaseRecord, fetchBudgets, fetchTotalSpent, upsertBudget, fetchPurchaseCategories, seedDefaultCategories };

@@ -138,29 +138,41 @@ function showMessage(message, type) {
     const successEl = document.getElementById('successMessage');
     const errorEl = document.getElementById('errorMessage');
     
-    // Ocultar todas as mensagens
+    // Ocultar todas as mensagens - remove both hidden class and set display none
     if(loadingEl){
         loadingEl.style.display = 'none';
+        loadingEl.classList.add('hidden');
     }
 
     if(successEl){
         successEl.style.display = 'none';
+        successEl.classList.add('hidden');
     }
 
     if(errorEl) {
         errorEl.style.display = 'none';
+        errorEl.classList.add('hidden');
     }
     
-    if (type === 'loading') {
+    if (type === 'loading' && loadingEl) {
+        loadingEl.classList.remove('hidden');
         loadingEl.style.display = 'block';
-    } else if (type === 'success' && message) {
+    } else if (type === 'success' && message && successEl) {
         successEl.textContent = message;
+        successEl.classList.remove('hidden');
         successEl.style.display = 'block';
-        setTimeout(() => successEl.style.display = 'none', 5000);
-    } else if (type === 'error' && message) {
+        setTimeout(() => {
+            successEl.style.display = 'none';
+            successEl.classList.add('hidden');
+        }, 5000);
+    } else if (type === 'error' && message && errorEl) {
         errorEl.textContent = message;
+        errorEl.classList.remove('hidden');
         errorEl.style.display = 'block';
-        setTimeout(() => errorEl.style.display = 'none', 5000);
+        setTimeout(() => {
+            errorEl.style.display = 'none';
+            errorEl.classList.add('hidden');
+        }, 5000);
     }
 }
 
@@ -297,4 +309,52 @@ function populateCategorySelect(selectId, includeEmpty = true) {
     ).join('');
     
     select.innerHTML = options;
+}
+
+async function loadPurchaseCategories(user_id) {
+    try {
+        const response = await fetch(`/.netlify/functions/get-purchase-categories?user_id=${user_id}`);
+        if (!response.ok) {
+            throw new Error(`Error fetching categories: ${response.status}`);
+        }
+        const categories = await response.json();
+        return categories;
+    } catch (error) {
+        console.error('Error loading purchase categories:', error);
+        // Return empty array on error so the form doesn't break
+        return [];
+    }
+}
+
+async function populatePurchaseCategorySelect(selectId, includeEmpty = true) {
+    const select = document.getElementById(selectId);
+    if (!select) {
+        console.error(`Select element with id '${selectId}' not found`);
+        return;
+    }
+
+    const user_id = await getUserId();
+    if (!user_id) {
+        console.error('User ID not found, cannot load categories');
+        return;
+    }
+
+    try {
+        const categories = await loadPurchaseCategories(user_id);
+        
+        let options = '';
+        if (includeEmpty) {
+            options += '<option value="">Selecione uma categoria</option>';
+        }
+        
+        options += categories.map(category => 
+            `<option value="${category.name}">${category.name}</option>`
+        ).join('');
+        
+        select.innerHTML = options;
+    } catch (error) {
+        console.error('Error populating purchase category select:', error);
+        // Fallback to empty select if categories fail to load
+        select.innerHTML = includeEmpty ? '<option value="">Erro ao carregar categorias</option>' : '';
+    }
 }
