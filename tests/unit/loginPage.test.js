@@ -16,27 +16,29 @@ test('Login page HTML structure and styling', () => {
   assert(loginHtml.includes('type="submit"'), 'Submit button should be present');
 
   // Verify improved styling is present
-  assert(loginHtml.includes('shopping-belt'), 'Shopping belt animation should be present');
+  assert(loginHtml.includes('floating-items'), 'Floating items container should be present');
   assert(loginHtml.includes('Barganhα'), 'Modern logo text should be present');
-  assert(loginHtml.includes('backdrop-filter: blur'), 'Glassmorphism effect should be present');
-  assert(loginHtml.includes('color: #374151 !important'), 'Label visibility fix should be present');
+  assert(loginHtml.includes('login.css'), 'External CSS file should be linked');
+  assert(loginHtml.includes('🛒'), 'Shopping cart emoji should be present in floating items');
 
   // Verify responsive design
-  assert(loginHtml.includes('@media (max-width: 480px)'), 'Mobile responsive styles should be present');
+  assert(loginHtml.includes('href="/static/css/login.css"'), 'External login CSS should be linked');
 });
 
 test('Login page CSS animations and transitions', () => {
-  const loginHtmlPath = path.join(process.cwd(), 'login.html');
-  const loginHtml = fs.readFileSync(loginHtmlPath, 'utf8');
+  const loginCssPath = path.join(process.cwd(), 'static/css/login.css');
+  const loginCss = fs.readFileSync(loginCssPath, 'utf8');
 
-  // Verify animations are defined
-  assert(loginHtml.includes('@keyframes shopping-belt'), 'Shopping belt animation keyframes should be defined');
-  assert(loginHtml.includes('@keyframes slideUp'), 'Slide up animation keyframes should be defined');
-  assert(loginHtml.includes('animation: shopping-belt'), 'Shopping belt animation should be applied');
-  assert(loginHtml.includes('animation: slideUp'), 'Slide up animation should be applied');
+  // Verify meteor shower animations are defined
+  assert(loginCss.includes('@keyframes meteor-shower'), 'Meteor shower animation keyframes should be defined');
+  assert(loginCss.includes('@keyframes meteor-trails'), 'Meteor trails animation keyframes should be defined');
+  assert(loginCss.includes('@keyframes float'), 'Float animation keyframes should be defined');
+  assert(loginCss.includes('@keyframes slideUp'), 'Slide up animation keyframes should be defined');
+  assert(loginCss.includes('animation: meteor-shower'), 'Meteor shower animation should be applied');
+  assert(loginCss.includes('animation: float'), 'Float animation should be applied');
 
   // Verify transitions are present
-  assert(loginHtml.includes('transition: all'), 'Smooth transitions should be defined');
+  assert(loginCss.includes('transition: all'), 'Smooth transitions should be defined');
 });
 
 test('Login page accessibility and semantic structure', () => {
