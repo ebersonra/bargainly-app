@@ -25,7 +25,10 @@ class NavigationComponent {
         <div class="nav-container">
           <div class="nav-brand">
             <a href="/index.html" class="brand-link">
-              <h1 class="brand-title">Barganha App</h1>
+              <div class="nav-logo">
+                <div class="nav-logo-text">Barganhα</div>
+                <div class="nav-logo-tagline">Smart Shopping • Better Deals</div>
+              </div>
             </a>
           </div>
           
@@ -60,10 +63,7 @@ class NavigationComponent {
                 </a>
               </li>
               <li class="nav-item">
-                <a href="/deals.html" class="nav-link ${this.currentPage === 'deals' ? 'active' : ''}">
-                  <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                  </svg>
+                <a href="/deals.html" class="nav-link nav-link-special ${this.currentPage === 'deals' ? 'active' : ''}">
                   🔥 Ofertas
                 </a>
               </li>
