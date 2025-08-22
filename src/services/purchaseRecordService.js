@@ -59,4 +59,13 @@ async function getBudgetStatus(user_id, repo = repository) {
   });
 }
 
-module.exports = { insertPurchaseRecord, getBudgetStatus, setBudget };
+async function getPurchaseCategories(user_id, repo = repository) {
+  // First try to get existing categories, if none exist seed with defaults
+  let categories = await repo.fetchPurchaseCategories(user_id);
+  if (categories.length === 0) {
+    categories = await repo.seedDefaultCategories(user_id);
+  }
+  return categories;
+}
+
+module.exports = { insertPurchaseRecord, getBudgetStatus, setBudget, getPurchaseCategories };

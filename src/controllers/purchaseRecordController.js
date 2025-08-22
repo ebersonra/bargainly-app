@@ -12,4 +12,8 @@ async function setBudget(data, srv = service) {
   return srv.setBudget(data);
 }
 
-module.exports = { insertPurchaseRecord, getBudgetStatus, setBudget };
+async function getPurchaseCategories(user_id, srv = service) {
+  return srv.getPurchaseCategories(user_id);
+}
+
+module.exports = { insertPurchaseRecord, getBudgetStatus, setBudget, getPurchaseCategories };
