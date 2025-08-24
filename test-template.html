@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Template</title>
+</head>
+<body>
+    <h1>Teste de Acesso ao Template</h1>
+    <div id="result"></div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                console.log('Tentando acessar template diretamente...');
+                const response = await fetch('/static/templates/components/navigation.html');
+                console.log('Response status:', response.status);
+                
+                if (response.ok) {
+                    const content = await response.text();
+                    console.log('Template carregado com sucesso:', content.substring(0, 200));
+                    document.getElementById('result').innerHTML = `
+                        <div style="color: green;">✓ Template acessível</div>
+                        <pre style="background: #f5f5f5; padding: 10px; margin: 10px 0;">${content.substring(0, 300)}...</pre>
+                    `;
+                } else {
+                    console.error('Template não encontrado:', response.status);
+                    document.getElementById('result').innerHTML = `
+                        <div style="color: red;">✗ Template não acessível (${response.status})</div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Erro ao acessar template:', error);
+                document.getElementById('result').innerHTML = `
+                    <div style="color: red;">✗ Erro: ${error.message}</div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

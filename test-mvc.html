@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste da Estrutura MVC</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>Teste da Estrutura MVC - Bargainly App</h1>
+    <div id="test-results"></div>
+
+    <!-- Carrega a estrutura MVC -->
+    <script src="/src/config.js"></script>
+    
+    <script>
+        // Aguarda a inicialização completa
+        setTimeout(() => {
+            const results = document.getElementById('test-results');
+            let html = '';
+
+            // Teste 1: Verificar se as funções globais estão disponíveis
+            html += testGlobalFunctions();
+            
+            // Teste 2: Verificar se os serviços estão disponíveis
+            html += testServices();
+            
+            // Teste 3: Verificar se os controllers estão disponíveis
+            html += testControllers();
+            
+            // Teste 4: Verificar se o app principal está disponível
+            html += testMainApp();
+
+            results.innerHTML = html;
+        }, 2000);
+
+        function testGlobalFunctions() {
+            let html = '<h2>Teste de Funções Globais</h2>';
+            
+            const globalFunctions = [
+                'getUserId',
+                'showNotification',
+                'showMessage',
+                'populateMarketSelect',
+                'loadMarkets',
+                'populateCategorySelect'
+            ];
+
+            globalFunctions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    html += `<div class="test-result success">✅ ${funcName} - Disponível</div>`;
+                } else {
+                    html += `<div class="test-result error">❌ ${funcName} - Não encontrada</div>`;
+                }
+            });
+
+            return html;
+        }
+
+        function testServices() {
+            let html = '<h2>Teste de Serviços</h2>';
+            
+            const services = [
+                'marketService',
+                'productService',
+                'budgetService',
+                'barcodeScanner'
+            ];
+
+            services.forEach(serviceName => {
+                if (window[serviceName]) {
+                    html += `<div class="test-result success">✅ ${serviceName} - Disponível</div>`;
+                } else {
+                    html += `<div class="test-result error">❌ ${serviceName} - Não encontrado</div>`;
+                }
+            });
+
+            return html;
+        }
+
+        function testControllers() {
+            let html = '<h2>Teste de Controllers</h2>';
+            
+            const controllers = [
+                'MarketController',
+                'ProductController',
+                'PurchaseController',
+                'BudgetController',
+                'DashboardController',
+                'LoginController'
+            ];
+
+            controllers.forEach(controllerName => {
+                if (window[controllerName]) {
+                    html += `<div class="test-result success">✅ ${controllerName} - Disponível</div>`;
+                } else {
+                    html += `<div class="test-result error">❌ ${controllerName} - Não encontrado</div>`;
+                }
+            });
+
+            return html;
+        }
+
+        function testMainApp() {
+            let html = '<h2>Teste do App Principal</h2>';
+            
+            if (window.bargainlyApp) {
+                html += `<div class="test-result success">✅ bargainlyApp - Disponível</div>`;
+                
+                if (window.bargainlyApp.isInitialized()) {
+                    html += `<div class="test-result success">✅ App inicializado</div>`;
+                } else {
+                    html += `<div class="test-result info">⏳ App ainda não inicializado</div>`;
+                }
+            } else {
+                html += `<div class="test-result error">❌ bargainlyApp - Não encontrado</div>`;
+            }
+
+            return html;
+        }
+    </script>
+</body>
+</html>
