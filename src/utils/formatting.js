@@ -7,40 +7,8 @@
  * Format currency value to Brazilian Real
  * @param {number} value - Numeric value
  * @param {Object} options - Formatting options
- * @returns {string} - Formatted cu// Export for use in browser or Node.js
-if (typeof window !== 'undefined') {
-  // Browser environment - add to window object
-  window.formatUtils = {
-    formatCurrency,
-    formatCnpj,
-    formatPhone,
-    formatDate,
-    formatDateTime,
-    formatNumber,
-    formatPercentage,
-    truncateText,
-    capitalizeWords,
-    formatFileSize,
-    formatBarcode,
-    removeNonNumeric
-  };
-} else if (typeof module !== 'undefined' && module.exports) {
-  // Node.js environment
-  module.exports = {
-    formatCurrency,
-    formatCnpj,
-    formatPhone,
-    formatDate,
-    formatDateTime,
-    formatNumber,
-    formatPercentage,
-    truncateText,
-    capitalizeWords,
-    formatFileSize,
-    formatBarcode,
-    removeNonNumeric
-  };
-} */
+ * @returns {string} - Formatted currency value
+*/
 function formatCurrency(value, options = {}) {
   const { 
     currency = 'BRL', 
