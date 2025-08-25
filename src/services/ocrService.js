@@ -5,28 +5,122 @@
  */
 
 /**
- * Process receipt data (image or text)
- * @param {Object|Buffer|string} data - Receipt data to process
- * @param {Object} options - Processing options
- * @returns {Object} - Processed receipt data with extracted items
+ * Extract items from receipt text with basic categorization
+ * @param {string} text - Receipt text
+ * @returns {Array} - Array of items with categories
  */
-async function processReceipt(data, options = {}) {
+function extractItemsFromText(text) {
+  if (!text || typeof text !== 'string') {
+    return [];
+  }
+  
+  const items = [];
+  const lines = text.split('\n');
+  
+  // Simple pattern matching for items and prices
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (trimmed.length === 0) return;
+    
+    // Pattern: "ItemName Price" (supports various formats)
+    const match = trimmed.match(/^(.+?)\s+(\d+(?:[.,]\d{2})?)$/);
+    if (match) {
+      const name = match[1].trim();
+      const price = parseFloat(match[2].replace(',', '.'));
+      
+      if (name.length > 1 && price > 0) {
+        items.push({
+          name,
+          price,
+          category: categorizeItem(name),
+          quantity: 1
+        });
+      }
+    }
+  });
+  
+  return items;
+}
+
+/**
+ * Simple item categorization based on name
+ * @param {string} itemName - Name of the item
+ * @returns {string} - Category of the item
+ */
+function categorizeItem(itemName) {
+  const name = itemName.toLowerCase();
+  
+  // Produce
+  if (name.includes('banana') || name.includes('maça') || name.includes('tomate') || 
+      name.includes('alface') || name.includes('cebola') || name.includes('batata')) {
+    return 'produce';
+  }
+  
+  // Butcher/Meat
+  if (name.includes('carne') || name.includes('frango') || name.includes('peixe') || 
+      name.includes('linguiça') || name.includes('bacon')) {
+    return 'butcher';
+  }
+  
+  // Dairy
+  if (name.includes('leite') || name.includes('queijo') || name.includes('iogurte') || 
+      name.includes('manteiga')) {
+    return 'dairy';
+  }
+  
+  // Default
+  return 'others';
+}
+
+/**
+ * Process receipt data (image or text) and create purchase records
+ * @param {Object} data - Receipt data with user_id, vendor, text etc
+ * @param {Object} purchaseService - Service for creating purchase records
+ * @returns {Object} - Processed receipt data with records and manualEntry flag
+ */
+async function processReceipt(data, purchaseService = null) {
   if (!data) {
     throw new Error('Receipt data is required');
   }
   
-  // Determine data type and process accordingly
-  if (Buffer.isBuffer(data) || (data instanceof File)) {
-    return processReceiptImage(data, options);
-  } else if (typeof data === 'string') {
-    return extractPurchaseDataFromText(data, options);
-  } else if (data.imageData) {
-    return processReceiptImage(data.imageData, options);
-  } else if (data.text) {
-    return extractPurchaseDataFromText(data.text, options);
+  try {
+    // Extract items from text
+    let items = [];
+    let manualEntry = false;
+    
+    if (data.text) {
+      items = extractItemsFromText(data.text);
+      if (items.length === 0) {
+        manualEntry = true;
+        return { records: [], manualEntry: true };
+      }
+    } else {
+      manualEntry = true;
+      return { records: [], manualEntry: true };
+    }
+    
+    // Create purchase records if service provided
+    const records = [];
+    if (purchaseService && items.length > 0) {
+      for (const item of items) {
+        const record = {
+          user_id: data.user_id,
+          vendor: data.vendor || 'Unknown',
+          product_name: item.name,
+          amount: item.price,
+          category: item.category,
+          quantity: item.quantity || 1
+        };
+        
+        const savedRecord = await purchaseService.insertPurchaseRecord(record);
+        records.push(savedRecord);
+      }
+    }
+    
+    return { records, manualEntry };
+  } catch (error) {
+    return { records: [], manualEntry: true };
   }
-  
-  throw new Error('Invalid receipt data format');
 }
 
 /**
@@ -261,6 +355,8 @@ function extractMarketInfo(text) {
 
 module.exports = { 
   processReceipt,
+  extractItemsFromText,
+  categorizeItem,
   processReceiptImage,
   extractPurchaseDataFromText,
   validateAndCleanItems,

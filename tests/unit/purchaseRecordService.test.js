@@ -16,7 +16,7 @@ test('getBudgetStatus calculates percentages and alerts', async () => {
   };
   const result = await service.getBudgetStatus('user1', mockRepo);
   assert.deepStrictEqual(result, [
-    { category: 'food', limit: 100, spent: 90, percentage: 90, alert: 'near limit' }
+    { category: 'food', limit: 100, spent: 90, percentage: 90, alert: 'near limit', remaining: 10 }
   ]);
 });
 
