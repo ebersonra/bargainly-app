@@ -95,23 +95,20 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/static/js/mvc/components/Navigation.js"></script>
-    <script src="/static/js/mvc/controllers/BaseController.js"></script>
-    <script src="/static/js/auth.js"></script>
-    <script src="/static/js/utils.js"></script>
-    <script src="/static/js/bargainly-app.js"></script>
-    <script src="/static/js/budgets-app.js"></script>
+    <script src="/src/utils/auth.js"></script>
+    <script src="/src/utils/ui.js"></script>
+    <script src="/src/utils/formatting.js"></script>
 
     <script>
         // Goals page specific controller
-        class GoalsController extends BaseController {
+        class GoalsController {
             constructor() {
-                super();
                 this.init();
             }
 
             init() {
                 this.setCurrentMonth();
+                this.loadCategories();
                 this.loadBudgets();
                 this.setupEventListeners();
             }
@@ -122,33 +119,73 @@
                 document.getElementById('budgetMonth').value = currentMonth;
             }
 
+            async loadCategories() {
+                try {
+                    // Load categories for the select
+                    if (typeof window !== 'undefined' && window.populatePurchaseCategorySelect) {
+                        await window.populatePurchaseCategorySelect('budgetCategory');
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar categorias:', error);
+                }
+            }
+
             setupEventListeners() {
                 const form = document.getElementById('budgetForm');
-                this.handleFormSubmission(form, (data) => this.createBudget(data));
+                if (form) {
+                    form.addEventListener('submit', (e) => this.handleFormSubmit(e));
+                }
 
                 document.getElementById('refreshBudgets')?.addEventListener('click', () => {
                     this.loadBudgets();
                 });
             }
 
+            async handleFormSubmit(e) {
+                e.preventDefault();
+                
+                try {
+                    const formData = new FormData(e.target);
+                    const data = {
+                        category: formData.get('category'),
+                        limit: parseFloat(formData.get('limit')),
+                        month: formData.get('month')
+                    };
+
+                    await this.createBudget(data);
+                } catch (error) {
+                    this.showError('Erro ao processar formulário: ' + error.message);
+                }
+            }
+
             async createBudget(data) {
                 try {
-                    const userId = this.getUserIdFromCookie();
+                    const userId = this.getUserId();
                     if (!userId) {
                         throw new Error('Usuário não autenticado');
                     }
 
-                    // Use existing budget functionality if available
-                    if (typeof window.submitBudget === 'function') {
-                        await window.submitBudget({
+                    const response = await fetch('/.netlify/functions/set-budget', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
                             user_id: userId,
                             category: data.category,
-                            limit: parseFloat(data.limit),
+                            limit: data.limit,
                             month: data.month
-                        });
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `Erro ${response.status}: ${response.statusText}`);
                     }
 
-                    this.showSuccess('Meta cadastrada com sucesso!', document.getElementById('budgetForm').parentElement);
+                    const result = await response.json();
+                    
+                    this.showSuccess('Meta cadastrada com sucesso!');
                     document.getElementById('budgetForm').reset();
                     this.setCurrentMonth();
                     await this.loadBudgets();
@@ -162,33 +199,76 @@
                 this.showLoading(container);
 
                 try {
-                    // Use existing budget loading if available
-                    if (typeof window.loadBudgets === 'function') {
-                        await window.loadBudgets();
+                    const userId = this.getUserId();
+                    if (!userId) {
+                        throw new Error('Usuário não autenticado');
                     }
-                    await this.updateBudgetSummary();
+
+                    const response = await fetch(`/.netlify/functions/get-budget-status?user_id=${userId}`);
+                    if (!response.ok) {
+                        throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                    }
+
+                    const budgets = await response.json();
+                    this.displayBudgets(budgets);
+                    await this.updateBudgetSummary(budgets);
                 } catch (error) {
-                    this.showError('Erro ao carregar metas: ' + error.message, container.parentElement);
+                    this.showError('Erro ao carregar metas: ' + error.message);
                 } finally {
                     this.hideLoading(container);
                 }
             }
 
-            async updateBudgetSummary() {
-                try {
-                    const userId = this.getUserIdFromCookie();
-                    if (!userId) return;
+            displayBudgets(budgets) {
+                const container = document.getElementById('budgetsList');
+                
+                if (!budgets || budgets.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 11H7v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-9h-2v9H9v-9z"/>
+                                <path d="M13 2.05v3.03c3.39.49 6 3.39 6 6.92 0 .9-.18 1.75-.48 2.54l.8 1.67c.67-1.25 1.01-2.65 1.01-4.21 0-4.39-3.21-8.06-7.33-8.95zM9.37 5.28C7.16 6.91 5.5 9.62 5.5 12.75c0 1.56.34 2.96 1.01 4.21l.8-1.67c-.3-.79-.48-1.64-.48-2.54 0-3.53 2.61-6.43 6-6.92V2.05c-4.12.89-7.33 4.56-7.33 8.95z"/>
+                            </svg>
+                            <h3>Nenhuma meta cadastrada</h3>
+                            <p>Cadastre suas primeiras metas de orçamento</p>
+                        </div>
+                    `;
+                    return;
+                }
 
-                    // Calculate totals from budget data
-                    const budgetElements = document.querySelectorAll('#budgetsList .budget-item');
+                const budgetsHTML = budgets.map(budget => {
+                    const percentage = budget.percentage || 0;
+                    const progressClass = percentage > 100 ? 'danger' : percentage > 80 ? 'warning' : 'safe';
+                    
+                    return `
+                        <div class="budget-item" data-budget="${budget.limit}" data-spent="${budget.spent}">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-semibold">${budget.category}</h3>
+                                <span class="text-sm text-neutral-600">${this.formatCurrency(budget.spent)} / ${this.formatCurrency(budget.limit)}</span>
+                            </div>
+                            <div class="budget-progress">
+                                <div class="budget-progress-bar ${progressClass}" style="width: ${Math.min(percentage, 100)}%"></div>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-neutral-600">${percentage.toFixed(1)}% utilizado</span>
+                                <span class="text-neutral-600">Restante: ${this.formatCurrency(budget.remaining)}</span>
+                            </div>
+                            ${budget.alert ? `<div class="mt-2 text-sm text-error-600">⚠️ ${budget.alert}</div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+
+                container.innerHTML = budgetsHTML;
+            }
+
+            async updateBudgetSummary(budgets) {
+                try {
                     let totalBudget = 0;
                     let totalSpent = 0;
 
-                    budgetElements.forEach(element => {
-                        const budget = parseFloat(element.dataset.budget || '0');
-                        const spent = parseFloat(element.dataset.spent || '0');
-                        totalBudget += budget;
-                        totalSpent += spent;
+                    budgets.forEach(budget => {
+                        totalBudget += budget.limit || 0;
+                        totalSpent += budget.spent || 0;
                     });
 
                     const totalRemaining = totalBudget - totalSpent;
@@ -216,11 +296,49 @@
                 }
             }
 
+            // Utility methods
+            getUserId() {
+                if (typeof window !== 'undefined' && window.getUserId) {
+                    return window.getUserId();
+                }
+                
+                // Fallback to cookie parsing
+                const userCookie = document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('user_id='));
+                return userCookie ? userCookie.split('=')[1] : null;
+            }
+
             formatCurrency(value) {
                 return new Intl.NumberFormat('pt-BR', {
                     style: 'currency',
                     currency: 'BRL'
-                }).format(value);
+                }).format(value || 0);
+            }
+
+            showLoading(container) {
+                container.innerHTML = '<div class="loading">Carregando...</div>';
+            }
+
+            hideLoading(container) {
+                // Loading is replaced by content
+            }
+
+            showSuccess(message) {
+                if (typeof window !== 'undefined' && window.showNotification) {
+                    window.showNotification(message, 'success');
+                } else {
+                    alert(message);
+                }
+            }
+
+            showError(message) {
+                if (typeof window !== 'undefined' && window.showNotification) {
+                    window.showNotification(message, 'error');
+                } else {
+                    alert(message);
+                }
+                console.error(message);
             }
         }
 

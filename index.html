@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
+    <!-- Navigation placeholder -->
+    <div id="nav-menu"></div>
+    
     <div class="container">
         <div class="page-header">
             <h1>Bem-vindo ao Barganha App</h1>
@@ -131,13 +134,15 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/static/js/mvc/components/Navigation.js"></script>
-    <script src="/static/js/mvc/controllers/BaseController.js"></script>
-    <script src="/static/js/auth.js"></script>
-    <script src="/static/js/utils.js"></script>
-    <script src="/static/js/bargainly-app.js"></script>
-
-    <script src="/static/js/homeController.js"></script>
+    <script src="/src/utils/auth.js"></script>
+    <script src="/src/utils/ui.js"></script>
+    <script src="/src/utils/formatting.js"></script>
+    <!-- Views System -->
+    <script src="/src/views/ViewEngine.js"></script>
+    <script src="/src/views/NavigationController.js"></script>
+    <script src="/src/views/ViewsInitializer.js"></script>
+    <!-- Page Controller -->
+    <script src="/src/controllers/frontend/dashboardController.js"></script>
 
 
 </body>

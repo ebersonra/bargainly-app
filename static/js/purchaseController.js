@@ -25,10 +25,10 @@ class PurchaseController extends BaseController {
         const uploadArea = document.getElementById('receiptUploadArea');
         const fileInput = document.getElementById('receiptFileInput');
 
-        uploadArea.addEventListener('click', () => fileInput.click());
-        uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
-        uploadArea.addEventListener('drop', this.handleFileDrop.bind(this));
-        fileInput.addEventListener('change', this.handleFileSelect.bind(this));
+        uploadArea?.addEventListener('click', () => fileInput.click());
+        uploadArea?.addEventListener('dragover', this.handleDragOver.bind(this));
+        uploadArea?.addEventListener('drop', this.handleFileDrop.bind(this));
+        fileInput?.addEventListener('change', this.handleFileSelect.bind(this));
 
         // OCR actions
         document.getElementById('confirmOcrItems')?.addEventListener('click', () => {
@@ -60,14 +60,28 @@ class PurchaseController extends BaseController {
                 throw new Error('Usuário não autenticado');
             }
 
+            // Use the new PurchaseRecord model for validation
             const purchaseData = {
                 user_id: userId,
                 amount: parseFloat(data.amount),
                 category: data.category,
-                purchase_date: data.date,
+                purchase_date: data.date || data.purchase_date,
                 market: data.market || null,
-                notes: data.notes || null
+                description: data.description || null
             };
+
+            // Create and validate using the model
+            if (typeof PurchaseRecord !== 'undefined') {
+                const purchaseRecord = new PurchaseRecord(purchaseData);
+                const validation = purchaseRecord.validate();
+                
+                if (!validation.isValid) {
+                    throw new Error(validation.errors.join(', '));
+                }
+                
+                // Use validated data
+                Object.assign(purchaseData, purchaseRecord.toDbFormat());
+            }
 
             // Use existing purchase functionality if available
             if (typeof window.submitPurchase === 'function') {
@@ -123,23 +137,37 @@ class PurchaseController extends BaseController {
             return;
         }
 
-        const purchasesHTML = purchases.map(purchase => `
-            <div class="purchase-item">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h4 class="font-semibold">${purchase.category}</h4>
-                        <p class="text-sm text-neutral-600">${purchase.date}</p>
-                        ${purchase.market ? `<p class="text-sm text-neutral-500">${purchase.market}</p>` : ''}
+        const purchasesHTML = purchases.map(purchase => {
+            // Use PurchaseRecord model for formatting if available
+            let formattedAmount, formattedDate;
+            
+            if (typeof PurchaseRecord !== 'undefined') {
+                const purchaseModel = new PurchaseRecord(purchase);
+                formattedAmount = purchaseModel.getFormattedAmount();
+                formattedDate = purchaseModel.getFormattedDate();
+            } else {
+                formattedAmount = this.formatCurrency(purchase.amount);
+                formattedDate = purchase.date;
+            }
+
+            return `
+                <div class="purchase-item">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-semibold">${purchase.category}</h4>
+                            <p class="text-sm text-neutral-600">${formattedDate}</p>
+                            ${purchase.market ? `<p class="text-sm text-neutral-500">${purchase.market}</p>` : ''}
+                        </div>
+                        <div class="text-right">
+                            <span class="text-lg font-bold text-primary-600">
+                                ${formattedAmount}
+                            </span>
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <span class="text-lg font-bold text-primary-600">
-                            ${this.formatCurrency(purchase.amount)}
-                        </span>
-                    </div>
+                    ${purchase.description ? `<p class="text-sm text-neutral-600 mt-2">${purchase.description}</p>` : ''}
                 </div>
-                ${purchase.notes ? `<p class="text-sm text-neutral-600 mt-2">${purchase.notes}</p>` : ''}
-            </div>
-        `).join('');
+            `;
+        }).join('');
 
         container.innerHTML = purchasesHTML;
     }
@@ -170,8 +198,8 @@ class PurchaseController extends BaseController {
         const progressDiv = document.getElementById('ocrProgress');
         const resultsDiv = document.getElementById('ocrResults');
         
-        progressDiv.classList.remove('hidden');
-        resultsDiv.classList.add('hidden');
+        progressDiv?.classList.remove('hidden');
+        resultsDiv?.classList.add('hidden');
 
         try {
             // Process image with OCR API
@@ -192,13 +220,15 @@ class PurchaseController extends BaseController {
         } catch (error) {
             this.showError('Erro ao processar nota fiscal: ' + error.message, progressDiv.parentElement);
         } finally {
-            progressDiv.classList.add('hidden');
+            progressDiv?.classList.add('hidden');
         }
     }
 
     displayOcrResults(items) {
         const resultsDiv = document.getElementById('ocrResults');
         const itemsList = document.getElementById('ocrItemsList');
+
+        if (!resultsDiv || !itemsList) return;
 
         if (items.length === 0) {
             itemsList.innerHTML = '<p class="text-neutral-600">Nenhum item encontrado na nota fiscal.</p>';
@@ -223,12 +253,13 @@ class PurchaseController extends BaseController {
         const items = document.querySelectorAll('.ocr-item');
         // Process each item...
         this.cancelOcr();
-        this.showSuccess('Itens da nota fiscal registrados com sucesso!', document.getElementById('ocrResults').parentElement);
+        this.showSuccess('Itens da nota fiscal registrados com sucesso!', document.getElementById('ocrResults')?.parentElement);
     }
 
     cancelOcr() {
-        document.getElementById('ocrResults').classList.add('hidden');
-        document.getElementById('receiptFileInput').value = '';
+        document.getElementById('ocrResults')?.classList.add('hidden');
+        const fileInput = document.getElementById('receiptFileInput');
+        if (fileInput) fileInput.value = '';
     }
 
     formatCurrency(value) {

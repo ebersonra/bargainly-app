@@ -11,13 +11,14 @@ function getClient() {
 
 async function insertPurchaseRecord(record) {
   const supabase = getClient();
-  const { user_id, amount, category, source, purchase_date } = record;
+  const { user_id, amount, category, source, purchase_date, description } = record;
   const { data, error } = await supabase.rpc('insert_purchase_record', {
     p_user_id: user_id,
     p_category: category,
     p_value: amount,
     p_source: source || null,
-    p_date: purchase_date || new Date().toISOString().slice(0, 10)
+    p_date: purchase_date || new Date().toISOString().slice(0, 10),
+    p_description: description || null // Map description to description
   });
   if (error) throw new Error(error.message);
   return data;
@@ -119,4 +120,48 @@ async function seedDefaultCategories(user_id) {
   return data || [];
 }
 
-module.exports = { insertPurchaseRecord, fetchBudgets, fetchTotalSpent, upsertBudget, fetchPurchaseCategories, seedDefaultCategories };
+async function fetchPurchaseRecords(params) {
+  const supabase = getClient();
+  const { user_id, limit = 10, offset = 0 } = params;
+  
+  const { data, error } = await supabase
+    .from('purchase_records')
+    .select(`
+      id,
+      value,
+      source,
+      purchase_date,
+      description,
+      created_at,
+      purchase_categories(name)
+    `)
+    .eq('user_id', user_id)
+    .order('created_at', { ascending: false })
+    .range(offset, offset + limit - 1);
+  
+  if (error) throw new Error(error.message);
+  
+  // Format the response to match frontend expectations
+  return (data || []).map(record => ({
+    id: record.id,
+    amount: record.value,
+    value: record.value, // Keep both for compatibility
+    category: record.purchase_categories?.name || 'Sem categoria',
+    market: record.source, // Use source as market for now
+    source: record.source,
+    purchase_date: record.purchase_date,
+    date: record.purchase_date, // Keep both for compatibility
+    description: record.description, // Description field from database
+    created_at: record.created_at
+  }));
+}
+
+module.exports = { 
+  insertPurchaseRecord, 
+  fetchBudgets, 
+  fetchTotalSpent, 
+  upsertBudget, 
+  fetchPurchaseCategories, 
+  seedDefaultCategories,
+  fetchPurchaseRecords
+};

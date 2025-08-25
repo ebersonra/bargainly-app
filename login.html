@@ -42,7 +42,9 @@
     </form>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/static/js/utils.js"></script>
+  <script src="/src/utils/auth.js"></script>
+  <script src="/src/utils/ui.js"></script>
+  <script src="/src/controllers/frontend/loginController.js"></script>
   <script>
     fetch('/.netlify/functions/get-env')
       .then(res => res.json())
@@ -50,22 +52,8 @@
         window.SUPABASE_URL = env.SUPABASE_URL;
         window.SUPABASE_PUBLISHABLE_KEY = env.SUPABASE_PUBLISHABLE_KEY;
         
-        // Initialize Supabase client
-        var script = document.createElement('script');
-        script.src = '/static/js/supabase-client.js';
-        script.onload = function() {
-          // Initialize auth client
-          var authScript = document.createElement('script');
-          authScript.src = '/static/js/auth.js';
-          authScript.onload = function() {
-            // Initialize login app
-            var loginAppScript = document.createElement('script');
-            loginAppScript.src = '/static/js/login-app.js';
-            document.body.appendChild(loginAppScript);
-          };
-          document.body.appendChild(authScript);
-        };
-        document.body.appendChild(script); 
+        // Supabase client and controllers are already loaded above
+        // Initialize login functionality if needed by the controller
       });
   </script>
 </body>
