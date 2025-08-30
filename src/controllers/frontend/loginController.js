@@ -29,33 +29,53 @@ class LoginController {
         // Check if Supabase is available
         if (!window.supabase?.auth) {
             console.error('Supabase client not initialized');
-            this.showMessage('Erro na configuração do sistema. Tente novamente.', 'error');
+            this.showMessage('Aguarde a inicialização do sistema...', 'loading');
+            
+            // Wait a bit and try again
+            setTimeout(() => {
+                if (window.supabase?.auth) {
+                    this.handleLogin(event);
+                } else {
+                    this.showMessage('Erro na configuração do sistema. Recarregue a página.', 'error');
+                }
+            }, 2000);
             return;
         }
 
         this.showMessage('Fazendo login...', 'loading');
 
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({ 
+            const { data, error } = await window.supabase.auth.signInWithPassword({ 
                 email, 
                 password 
             });
 
             if (error) {
                 console.error('Erro de login:', error.message);
-                this.showMessage('Falha no login. Verifique suas credenciais.', 'error');
+                let errorMessage = 'Falha no login. Verifique suas credenciais.';
+                
+                // Provide more specific error messages
+                if (error.message.includes('Invalid login credentials')) {
+                    errorMessage = 'Email ou senha incorretos.';
+                } else if (error.message.includes('Email not confirmed')) {
+                    errorMessage = 'Por favor, confirme seu email antes de fazer login.';
+                }
+                
+                this.showMessage(errorMessage, 'error');
                 return;
             }
 
-            // Set user cookie for session management
-            this.setUserCookie(data.user.id);
-            
-            this.showMessage('Login realizado com sucesso!', 'success');
-            
-            // Redirect to main application
-            setTimeout(() => {
-                window.location.href = '/';
-            }, 1000);
+            if (data.user) {
+                // Set user ID using the auth utility
+                this.setUserCookie(data.user.id);
+                
+                this.showMessage('Login realizado com sucesso!', 'success');
+                
+                // Redirect to main application
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1000);
+            }
 
         } catch (error) {
             console.error('Erro inesperado no login:', error);
@@ -88,28 +108,46 @@ class LoginController {
         // Check if Supabase is available
         if (!window.supabase?.auth) {
             console.error('Supabase client not initialized');
-            this.showMessage('Erro na configuração do sistema. Tente novamente.', 'error');
+            this.showMessage('Aguarde a inicialização do sistema...', 'loading');
+            
+            // Wait a bit and try again
+            setTimeout(() => {
+                if (window.supabase?.auth) {
+                    this.handleRegister(event);
+                } else {
+                    this.showMessage('Erro na configuração do sistema. Recarregue a página.', 'error');
+                }
+            }, 2000);
             return;
         }
 
         this.showMessage('Criando conta...', 'loading');
 
         try {
-            const { data, error } = await supabase.auth.signUp({
+            const { data, error } = await window.supabase.auth.signUp({
                 email,
                 password
             });
 
             if (error) {
                 console.error('Erro de registro:', error.message);
-                this.showMessage('Falha ao criar conta. Tente novamente.', 'error');
+                let errorMessage = 'Falha ao criar conta. Tente novamente.';
+                
+                // Provide more specific error messages
+                if (error.message.includes('User already registered')) {
+                    errorMessage = 'Este email já está cadastrado. Tente fazer login.';
+                } else if (error.message.includes('Password should be at least')) {
+                    errorMessage = 'A senha deve ter pelo menos 6 caracteres.';
+                }
+                
+                this.showMessage(errorMessage, 'error');
                 return;
             }
 
             if (data.user && !data.session) {
                 this.showMessage('Conta criada! Verifique seu email para confirmar a conta.', 'success');
             } else if (data.session) {
-                // Set user cookie for session management
+                // Set user ID using the auth utility
                 this.setUserCookie(data.user.id);
                 this.showMessage('Conta criada e login realizado com sucesso!', 'success');
                 
@@ -150,15 +188,21 @@ class LoginController {
         }
     }
 
-    checkAuthAndRedirect() {
+    async checkAuthAndRedirect() {
         // Check if user is already logged in
-        if (typeof window !== 'undefined' && window.isAuthenticated && window.isAuthenticated()) {
-            window.location.href = '/';
+        try {
+            const isAuth = await (window.isAuthenticated ? window.isAuthenticated() : false);
+            if (isAuth) {
+                window.location.href = '/';
+            }
+        } catch (error) {
+            console.error('Error checking auth status:', error);
+            // If there's an error, just continue to show login page
         }
     }
 
-    initialize() {
-        this.checkAuthAndRedirect();
+    async initialize() {
+        await this.checkAuthAndRedirect();
     }
 }
 

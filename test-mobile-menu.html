@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Menu Mobile - Barganha App</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Navigation placeholder -->
+    <div id="nav-menu"></div>
+    
+    <div class="container">
+        <div class="page-header">
+            <h1>Teste do Menu Mobile</h1>
+            <p>Clique no botão do menu (três linhas) no canto superior direito para testar</p>
+        </div>
+
+        <div class="page-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Instruções para teste</h2>
+                </div>
+                <div class="card-body">
+                    <ol>
+                        <li>Abra as ferramentas de desenvolvedor (F12)</li>
+                        <li>Ative o modo responsivo ou redimensione a janela para menos de 1024px</li>
+                        <li>Clique no botão do menu (três linhas)</li>
+                        <li>O menu deve abrir em tela cheia</li>
+                        <li>Clique novamente no botão do menu para fechar</li>
+                        <li>Ou clique em qualquer link do menu</li>
+                        <li>Ou clique fora do menu</li>
+                    </ol>
+                    
+                    <p><strong>Verifique o console para logs de debug.</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/src/views/ViewEngine.js"></script>
+    <script src="/src/views/NavigationController.js"></script>
+    <script>
+        // Initialize navigation when DOM is ready
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                console.log('Inicializando teste do menu mobile...');
+                
+                // Initialize view engine
+                if (window.ViewEngine) {
+                    window.viewEngine = new window.ViewEngine();
+                    console.log('ViewEngine inicializado');
+                }
+
+                // Initialize navigation
+                if (window.NavigationController) {
+                    const navigationController = new window.NavigationController(window.viewEngine);
+                    console.log('NavigationController inicializado');
+                }
+            } catch (error) {
+                console.error('Erro ao inicializar:', error);
+            }
+        });
+    </script>
+</body>
+</html>

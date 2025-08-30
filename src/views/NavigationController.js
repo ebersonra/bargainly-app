@@ -68,6 +68,8 @@ class NavigationController {
 
   async init() {
     await this.render();
+    // Aguarda um próximo tick para garantir que o DOM foi atualizado
+    await new Promise(resolve => setTimeout(resolve, 0));
     this.attachEventListeners();
   }
 
@@ -91,6 +93,10 @@ class NavigationController {
         document.body.insertAdjacentHTML('afterbegin', navHTML);
         console.log('NavigationController render - HTML inserido no body');
       }
+      
+      // Força uma atualização do DOM antes de retornar
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      
     } catch (error) {
       console.error('Error rendering navigation:', error);
       // Fallback to basic navigation
@@ -119,15 +125,30 @@ class NavigationController {
   }
 
   attachEventListeners() {
+    console.log('NavigationController attachEventListeners - iniciando');
+    
     // Mobile menu toggle
     const navToggle = document.querySelector('.nav-toggle');
     const navMenu = document.querySelector('.nav-menu');
     
+    console.log('NavigationController attachEventListeners - elementos encontrados:', {
+      navToggle: !!navToggle,
+      navMenu: !!navMenu
+    });
+    
     if (navToggle && navMenu) {
-      navToggle.addEventListener('click', () => {
+      navToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('NavigationController - nav-toggle clicado');
         navMenu.classList.toggle('nav-menu-open');
         navToggle.classList.toggle('nav-toggle-active');
+        console.log('NavigationController - classes atualizadas:', {
+          menuOpen: navMenu.classList.contains('nav-menu-open'),
+          toggleActive: navToggle.classList.contains('nav-toggle-active')
+        });
       });
+    } else {
+      console.warn('NavigationController - elementos nav-toggle ou nav-menu não encontrados');
     }
 
     // Logout functionality
@@ -140,8 +161,11 @@ class NavigationController {
 
     // Close menu on link click (mobile)
     const navLinks = document.querySelectorAll('.nav-link');
+    console.log('NavigationController attachEventListeners - nav-links encontrados:', navLinks.length);
+    
     navLinks.forEach(link => {
       link.addEventListener('click', () => {
+        console.log('NavigationController - nav-link clicado, fechando menu');
         if (navMenu) {
           navMenu.classList.remove('nav-menu-open');
         }
@@ -154,6 +178,7 @@ class NavigationController {
     // Close menu on outside click
     document.addEventListener('click', (e) => {
       if (navMenu && navToggle && !navMenu.contains(e.target) && !navToggle.contains(e.target)) {
+        console.log('NavigationController - clique fora do menu, fechando');
         navMenu.classList.remove('nav-menu-open');
         navToggle.classList.remove('nav-toggle-active');
       }

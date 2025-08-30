@@ -130,11 +130,64 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Initialize Supabase client
+        let supabaseClient = null;
+        
+        fetch('/.netlify/functions/get-env')
+          .then(res => res.json())
+          .then(env => {
+            if (env.SUPABASE_URL && env.SUPABASE_PUBLISHABLE_KEY) {
+              supabaseClient = supabase.createClient(env.SUPABASE_URL, env.SUPABASE_PUBLISHABLE_KEY);
+              window.supabase = supabaseClient;
+              
+              console.log('Supabase client initialized successfully');
+              
+              // Initialize authentication
+              initializeAuth();
+            } else {
+              console.error('Missing Supabase credentials');
+            }
+          })
+          .catch(error => {
+            console.error('Failed to load environment variables:', error);
+          });
+          
+        async function initializeAuth() {
+          // Load auth utilities first
+          await new Promise(resolve => {
+            if (window.checkAuth) {
+              resolve();
+            } else {
+              setTimeout(resolve, 1000);
+            }
+          });
+          
+          // Check authentication
+          try {
+            await window.checkAuth();
+          } catch (error) {
+            console.error('Authentication check failed:', error);
+            window.location.href = '/login.html';
+          }
+        }
+    </script>
     <script src="/src/utils/auth.js"></script>
     <script src="/src/utils/ui.js"></script>
     <script src="/src/utils/formatting.js"></script>
     <!-- Load MVC structure from src folder -->
     <script src="/src/controllers/frontend/purchaseController.js"></script>
+    <!-- Date initialization -->
+    <script>
+        // Set current date as default
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('purchaseDate');
+            if (dateInput) {
+                dateInput.value = today;
+            }
+        });
+    </script>
 
 </body>
 </html>

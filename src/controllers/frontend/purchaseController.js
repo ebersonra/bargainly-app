@@ -220,6 +220,12 @@ class PurchaseController {
 
     async initialize() {
         try {
+            // Set current date
+            this.setCurrentDate();
+            
+            // Wait a bit to ensure all dependencies are loaded
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
             // Populate market select
             if (typeof window !== 'undefined' && window.populateMarketSelect) {
                 window.populateMarketSelect('purchaseMarket');
@@ -229,6 +235,9 @@ class PurchaseController {
             if (typeof window !== 'undefined' && window.populatePurchaseCategorySelect) {
                 await window.populatePurchaseCategorySelect('purchaseCategory');
             }
+            
+            // Load recent purchases
+            this.loadRecentPurchases();
         } catch (error) {
             console.error('Erro ao inicializar página de compras:', error);
         }

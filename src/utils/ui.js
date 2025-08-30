@@ -79,17 +79,23 @@ const predefinedCategories = [
 
 async function loadUserCategories() {
     try {
-        const user_id = await getUserId();
-        const response = await fetch(`/.netlify/functions/get-purchase-categories?user_id=${user_id}`);
+        const user_id = getUserId(); // Remove await since getUserId is synchronous
+        if (!user_id) {
+            console.error('User ID not found');
+            return predefinedCategories;
+        }
+        
+        const response = await fetch(`/.netlify/functions/get-purchase-categories?user_id=${encodeURIComponent(user_id)}`);
         
         if (!response.ok) {
-            console.error('Erro ao carregar categorias:', response.statusText);
+            const errorText = await response.text();
+            console.error('Erro ao carregar categorias:', response.statusText, errorText);
             return predefinedCategories;
         }
         
         const categories = await response.json();
         if (Array.isArray(categories) && categories.length > 0) {
-            const userCategories = categories.map(cat => cat.category);
+            const userCategories = categories.map(cat => cat.name); // Fixed: use 'name' instead of 'category'
             // Combine user categories with predefined ones, removing duplicates
             return [...new Set([...userCategories, ...predefinedCategories])];
         }
@@ -118,9 +124,16 @@ function populateCategorySelect(selectId, includeEmpty = true) {
 
 async function populatePurchaseCategorySelect(selectId) {
     try {
-        const categories = await loadUserCategories();
         const select = document.getElementById(selectId);
-        if (!select) return;
+        if (!select) {
+            console.error(`Select element with id '${selectId}' not found`);
+            return;
+        }
+        
+        // Show loading state
+        select.innerHTML = '<option value="">Carregando categorias...</option>';
+        
+        const categories = await loadUserCategories();
         
         select.innerHTML = '<option value="">Selecione uma categoria</option>';
         categories.forEach(category => {
@@ -131,6 +144,10 @@ async function populatePurchaseCategorySelect(selectId) {
         });
     } catch (error) {
         console.error('Erro ao popular select de categorias:', error);
+        const select = document.getElementById(selectId);
+        if (select) {
+            select.innerHTML = '<option value="">Erro ao carregar categorias</option>';
+        }
     }
 }
 

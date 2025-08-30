@@ -42,19 +42,44 @@
     </form>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/src/utils/auth.js"></script>
-  <script src="/src/utils/ui.js"></script>
-  <script src="/src/controllers/frontend/loginController.js"></script>
   <script>
+    // Initialize Supabase client
+    let supabaseClient = null;
+    
     fetch('/.netlify/functions/get-env')
       .then(res => res.json())
       .then(env => {
-        window.SUPABASE_URL = env.SUPABASE_URL;
-        window.SUPABASE_PUBLISHABLE_KEY = env.SUPABASE_PUBLISHABLE_KEY;
-        
-        // Supabase client and controllers are already loaded above
-        // Initialize login functionality if needed by the controller
+        if (env.SUPABASE_URL && env.SUPABASE_PUBLISHABLE_KEY) {
+          supabaseClient = supabase.createClient(env.SUPABASE_URL, env.SUPABASE_PUBLISHABLE_KEY);
+          window.supabase = supabaseClient;
+          
+          console.log('Supabase client initialized successfully');
+          
+          // Check if user is already logged in
+          checkExistingSession();
+        } else {
+          console.error('Missing Supabase credentials');
+        }
+      })
+      .catch(error => {
+        console.error('Failed to load environment variables:', error);
       });
+      
+    async function checkExistingSession() {
+      try {
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
+        
+        if (session && session.user) {
+          console.log('User already logged in, redirecting...');
+          window.location.href = '/';
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+      }
+    }
   </script>
+  <script src="/src/utils/auth.js"></script>
+  <script src="/src/utils/ui.js"></script>
+  <script src="/src/controllers/frontend/loginController.js"></script>
 </body>
 </html>
