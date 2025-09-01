@@ -104,7 +104,7 @@ test('ViewEngine - Variable rendering with undefined values', async () => {
   assert.strictEqual(rendered, '<h1>Test Title</h1><p></p>', 'Should replace undefined variables with empty string');
 });
 
-test('ViewEngine - Each loop rendering (current behavior - bug)', async () => {
+test('ViewEngine - Each loop rendering (correct behavior)', async () => {
   const ViewEngine = getViewEngine();
   const viewEngine = new ViewEngine();
   
@@ -117,15 +117,12 @@ test('ViewEngine - Each loop rendering (current behavior - bug)', async () => {
   };
   
   const rendered = viewEngine.render(template, data);
-  // Current behavior: variables are processed before loops, causing empty substitutions
-  const expectedCurrentBehavior = '<ul><li> - </li><li> - </li></ul>';
-  assert.strictEqual(rendered, expectedCurrentBehavior, 'Should demonstrate current buggy behavior');
-  
-  // TODO: Fix ViewEngine to process loops before variables
-  // const expectedCorrectBehavior = '<ul><li>Product 1 - 10.00</li><li>Product 2 - 20.00</li></ul>';
+  // ViewEngine now correctly processes loops before variables
+  const expectedCorrectBehavior = '<ul><li>Product 1 - 10.00</li><li>Product 2 - 20.00</li></ul>';
+  assert.strictEqual(rendered, expectedCorrectBehavior, 'Should render loop variables correctly');
 });
 
-test('ViewEngine - Each loop with simple template (workaround)', async () => {
+test('ViewEngine - Each loop with simple template (correct behavior)', async () => {
   const ViewEngine = getViewEngine();
   const viewEngine = new ViewEngine();
   
@@ -139,9 +136,9 @@ test('ViewEngine - Each loop with simple template (workaround)', async () => {
   };
   
   const rendered = viewEngine.render(template, data);
-  // Even this doesn't work due to the bug - variables are processed first everywhere
-  const expectedBuggyBehavior = '<div>Item: </div><div>Item: </div>';
-  assert.strictEqual(rendered, expectedBuggyBehavior, 'Shows bug affects all variables, even in loops');
+  // ViewEngine now correctly processes loops before variables
+  const expectedCorrectBehavior = '<div>Item: 1</div><div>Item: 2</div>';
+  assert.strictEqual(rendered, expectedCorrectBehavior, 'Should render loop variables correctly in all contexts');
 });
 
 test('ViewEngine - Each loop with empty array', async () => {
@@ -321,15 +318,15 @@ test('ViewEngine - Complex template with multiple features (current behavior)', 
   const rendered = viewEngine.render(template, data);
   
   assert.ok(rendered.includes('Featured Products'), 'Should render title');
-  // Due to the variable processing bug, product names and prices won't appear
-  // assert.ok(rendered.includes('Product A'), 'Should render first product');
-  // assert.ok(rendered.includes('Product B'), 'Should render second product');
-  // assert.ok(rendered.includes('ON SALE!'), 'Should render sale badge for first product');
+  // ViewEngine now correctly processes loops before variables
+  assert.ok(rendered.includes('Product A'), 'Should render first product');
+  assert.ok(rendered.includes('Product B'), 'Should render second product');
+  assert.ok(rendered.includes('ON SALE!'), 'Should render sale badge for first product');
   assert.ok(!rendered.includes('No products available'), 'Should not render no products message');
   
-  // Test that the structure is there even if content is missing due to the bug
+  // Test that the structure is correct with proper content
   assert.ok(rendered.includes('<li class="product-item">'), 'Should render product list items');
-  assert.ok(rendered.includes('<h3></h3>'), 'Should render empty h3 tags due to variable processing bug');
+  assert.ok(rendered.includes('<h3>Product A</h3>'), 'Should render product names correctly');
 });
 
 test('ViewEngine - Complex template with no products', async () => {
@@ -533,8 +530,49 @@ test('ViewEngine - Mixed content with loops and conditions', async () => {
   const rendered = viewEngine.render(template, data);
   assert.ok(rendered.includes('My List'), 'Should render title');
   assert.ok(!rendered.includes('No items to show'), 'Should not show unless block');
-  // Due to variable processing bug, item texts won't appear
-  assert.ok(rendered.includes('<p></p>'), 'Should show empty paragraphs due to bug');
+  // ViewEngine now correctly processes loops before variables
+  assert.ok(rendered.includes('<p>Item 1</p>'), 'Should show correct item texts');
+  assert.ok(rendered.includes('<p>Item 2</p>'), 'Should show correct item texts');
+});
+
+test('ViewEngine - Block helpers processed before variables (demonstrates the fix)', async () => {
+  const ViewEngine = getViewEngine();
+  const viewEngine = new ViewEngine();
+  
+  // This template would fail if variables were processed before loops
+  // because {{title}} would be replaced with 'Products' everywhere,
+  // including inside the loop where it should be the item's title
+  const template = `
+    <div>{{title}}</div>
+    {{#each items}}
+      <div class="item">
+        <h3>{{title}}</h3>
+        <p>{{description}}</p>
+      </div>
+    {{/each}}
+  `;
+  
+  const data = {
+    title: 'Product List',
+    items: [
+      { title: 'Item 1', description: 'First item' },
+      { title: 'Item 2', description: 'Second item' }
+    ]
+  };
+  
+  const rendered = viewEngine.render(template, data);
+  
+  // Outer title should be "Product List"
+  assert.ok(rendered.includes('<div>Product List</div>'), 'Should render outer title correctly');
+  
+  // Loop items should have their own titles, not the outer title
+  assert.ok(rendered.includes('<h3>Item 1</h3>'), 'Should render first item title correctly');
+  assert.ok(rendered.includes('<h3>Item 2</h3>'), 'Should render second item title correctly');
+  assert.ok(rendered.includes('<p>First item</p>'), 'Should render first item description');
+  assert.ok(rendered.includes('<p>Second item</p>'), 'Should render second item description');
+  
+  // Should NOT have the outer title repeated in loop items
+  assert.ok(!rendered.includes('<h3>Product List</h3>'), 'Should not use outer title in loop items');
 });
 
 test('ViewEngine - Error cases and edge conditions', async () => {

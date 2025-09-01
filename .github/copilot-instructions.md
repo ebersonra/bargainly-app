@@ -56,7 +56,7 @@ Lightweight template system (`src/views/ViewEngine.js`) with:
 - Template caching (`Map` cache)
 - Handlebars-like syntax: `{{variable}}`, `{{#each}}`, `{{#if}}`
 - Browser/Node.js compatibility
-- Known limitation: Variable processing before loops causes substitution bugs
+- **Fixed**: Block helpers (each, if, unless) are now processed before variable substitution, ensuring loop variables render correctly
 
 ### 5. Database Access Pattern
 Repository layer uses Supabase service key for RPC calls:
@@ -141,7 +141,7 @@ Uses `sed` in `netlify.toml` to replace placeholders like `__GEMINI_API_KEY__` d
 
 ## Common Gotchas
 
-1. **ViewEngine bug**: Variables processed before loops, causing empty substitutions in `{{#each}}` blocks
+1. **ViewEngine**: Now correctly processes block helpers before variables, ensuring proper loop variable rendering
 2. **UUID requirements**: Database expects UUIDs for user_id, not strings like "test_user"
 3. **Environment loading**: Functions must handle both local (dotenv) and production environments
 4. **Testing pattern**: Use mocks in CI, real connections locally with valid UUIDs
