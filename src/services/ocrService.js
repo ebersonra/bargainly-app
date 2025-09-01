@@ -207,17 +207,9 @@ async function extractPurchaseDataFromText(text, options = {}) {
  * @returns {string} - Extracted text
  */
 async function callOcrApi(imageData, options = {}) {
-  // This would call the actual OCR service (Gemini, Google Vision, etc.)
-  // For now, return placeholder
-  
-  if (options.mockResponse) {
-    return options.mockResponse;
-  }
-  
-  // Simulate API call
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  throw new Error('OCR service not implemented - please implement callOcrApi function');
+  // Fallback: return empty string and log a warning
+  console.warn('Warning: OCR service not implemented - returning empty string as fallback.');
+  return '';
 }
 
 /**

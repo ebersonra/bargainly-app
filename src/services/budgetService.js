@@ -1,4 +1,3 @@
-const { budgetRepository } = require('../repositories/purchaseRecordRepository');
 const { getUserId } = require('../utils/auth');
 
 class BudgetService {

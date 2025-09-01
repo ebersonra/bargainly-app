@@ -1,4 +1,34 @@
 // Notification and UI utilities
+
+// Ensure getUserId function is available with fallback
+function ensureGetUserId() {
+    // In browser environment, check if getUserId is globally available
+    if (typeof window !== 'undefined' && typeof window.getUserId === 'function') {
+        return window.getUserId;
+    }
+    
+    // In Node.js environment, try to import from auth utils
+    if (typeof window === 'undefined') {
+        try {
+            const authUtils = require('./auth');
+            if (authUtils && typeof authUtils.getUserId === 'function') {
+                return authUtils.getUserId;
+            }
+        } catch (error) {
+            console.warn('Could not import getUserId from auth utils:', error.message);
+        }
+    }
+    
+    // Fallback function that returns null
+    return async function() {
+        console.warn('getUserId function not available, returning null');
+        return null;
+    };
+}
+
+// Get the getUserId function with fallback
+const getUserId = ensureGetUserId();
+
 function showNotification(message, type = 'info') {
     // Create notification element
     const notification = document.createElement('div');
@@ -79,7 +109,7 @@ const predefinedCategories = [
 
 async function loadUserCategories() {
     try {
-        const user_id = await getUserId(); // Await getUserId since it's asynchronous
+        const user_id = await getUserId(); // Use the ensured getUserId function
         if (!user_id) {
             console.error('User ID not found');
             return predefinedCategories;
