@@ -2,11 +2,12 @@
 
 ## Architecture Overview
 
-This is a price comparison and budget management web app built with vanilla JavaScript frontend and serverless backend (Netlify Functions + Supabase). The architecture follows a layered pattern:
+This is a price comparison and budget management web app built with vanilla JavaScript frontend and serverless backend (Netlify Functions + Supabase). The architecture follows a strict layered pattern:
 
 - **Frontend**: Tab-based SPA in `index.html` with modular JS files in `static/js/`
 - **Backend**: Netlify Functions in `netlify/functions/` implementing Controller → Service → Repository pattern
 - **Database**: Supabase PostgreSQL with RLS policies, migrations in `db/`
+- **Templates**: Custom ViewEngine (`src/views/ViewEngine.js`) with Handlebars-like syntax for component rendering
 
 ## Key Architectural Patterns
 
@@ -26,9 +27,8 @@ exports.buildHandler = buildHandler; // For testing
 - **Services** (`src/services/`): Business logic with validation
 - **Repositories** (`src/repositories/`): Database access via Supabase client
 
-Example service pattern:
+Example service pattern from `purchaseRecordService.js`:
 ```javascript
-// Always validate input, delegate to repository
 function validateRecord(data) {
   const required = ['user_id', 'amount', 'category'];
   for (const field of required) {
@@ -51,14 +51,20 @@ Each feature has its own JS module loaded in `index.html`:
 - `markets-app.js` - Market/store management with CNPJ lookup
 - `utils.js` - Shared utilities including `getUserId()` from cookies
 
-### 4. Database Access Pattern
+### 4. Custom ViewEngine System
+Lightweight template system (`src/views/ViewEngine.js`) with:
+- Template caching (`Map` cache)
+- Handlebars-like syntax: `{{variable}}`, `{{#each}}`, `{{#if}}`
+- Browser/Node.js compatibility
+- Known limitation: Variable processing before loops causes substitution bugs
+
+### 5. Database Access Pattern
 Repository layer uses Supabase service key for RPC calls:
 ```javascript
 const { data, error } = await supabase.rpc('insert_purchase_record', {
   p_user_id: user_id,
   p_category: category,
   p_value: amount,
-  // ...
 });
 ```
 
@@ -70,9 +76,10 @@ netlify dev  # Starts local dev server with functions
 ```
 
 ### Testing Strategy
-- Unit tests: `npm test` (Node.js built-in test runner)
-- Test files follow pattern: `tests/{unit,integration,e2e}/*.test.js`
-- Functions are testable via exported `buildHandler()` pattern
+- **Test runner**: Node.js built-in test runner (`npm test`)
+- **Test files**: `tests/{unit,integration,e2e}/*.test.js`
+- **CI/Mock pattern**: Environment detection for CI vs local testing
+- **Functions testing**: Via exported `buildHandler()` pattern with dependency injection
 
 ### Environment Variables
 All functions check `process.env.NODE_ENV !== 'production'` and conditionally load dotenv.
@@ -81,7 +88,7 @@ Required vars: `SUPABASE_URL`, `SUPABASE_SERVICE_API_KEY`, `GEMINI_API_KEY`, `BL
 ## Critical Integration Points
 
 ### 1. User Authentication
-- Frontend uses cookie-based `user_id` (see `getUserId()` in `utils.js`)
+- Frontend uses cookie-based `user_id` (see `getUserId()` in `static/js/utils.js`)
 - All backend operations filter by `user_id` for data isolation
 - Database uses RLS policies for security
 
@@ -89,6 +96,7 @@ Required vars: `SUPABASE_URL`, `SUPABASE_SERVICE_API_KEY`, `GEMINI_API_KEY`, `BL
 - **Bluesoft Cosmos**: Product data lookup by GTIN/barcode
 - **ReceitaWS**: Company data lookup by CNPJ  
 - **Gemini API**: OCR processing for receipt images
+- **Multiple AI providers**: Anthropic, OpenAI support
 
 ### 3. Database Design
 - Uses PostgreSQL stored procedures (`insert_purchase_record`) for complex operations
@@ -113,12 +121,27 @@ Budget progress uses custom CSS classes: `.budget-bar`, `.budget-bar-container`
 Single `static/css/style.css` with CSS custom properties for theming.
 Tab system uses `.tab-content` with `.active` class toggling.
 
-### 4. Build Process
+### 4. Test Mocking Patterns
+- Environment detection: `isCI = process.env.CI || process.env.GITHUB_ACTIONS`
+- Mock objects for CI environments
+- Dependency injection for testable functions
+- DOM mocking for frontend components
+
+### 5. Build Process
 Uses `sed` in `netlify.toml` to replace placeholders like `__GEMINI_API_KEY__` during build.
 
 ## Key Files to Understand
 
-- `src/services/purchaseRecordService.js` - Core business logic
-- `static/js/utils.js` - Shared frontend utilities
+- `src/services/purchaseRecordService.js` - Core business logic with validation patterns
+- `src/views/ViewEngine.js` - Custom template engine (has known variable substitution bugs)
+- `static/js/utils.js` - Shared frontend utilities including auth
 - `db/init.sql` - Database schema and RLS setup
 - `tests/e2e/purchaseRecordFunctions.test.js` - Function testing examples
+- `debug-test.js` - CI-compatible connection testing with environment detection
+
+## Common Gotchas
+
+1. **ViewEngine bug**: Variables processed before loops, causing empty substitutions in `{{#each}}` blocks
+2. **UUID requirements**: Database expects UUIDs for user_id, not strings like "test_user"
+3. **Environment loading**: Functions must handle both local (dotenv) and production environments
+4. **Testing pattern**: Use mocks in CI, real connections locally with valid UUIDs
