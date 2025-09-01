@@ -45,12 +45,7 @@ class ViewEngine {
     render(template, data = {}) {
         let rendered = template;
 
-        // Replace {{variable}} with data values
-        rendered = rendered.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-            return data[key] !== undefined ? data[key] : '';
-        });
-
-        // Handle {{#each array}} loops
+        // Handle {{#each array}} loops FIRST (before variable replacement)
         rendered = rendered.replace(/\{\{#each (\w+)\}\}([\s\S]*?)\{\{\/each\}\}/g, (match, arrayKey, content) => {
             const array = data[arrayKey] || [];
             return array.map(item => this.render(content, item)).join('');
@@ -59,18 +54,23 @@ class ViewEngine {
         // Handle {{#if condition}} blocks
         rendered = rendered.replace(/\{\{#if (\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g, (match, condition, content) => {
             const value = data[condition];
-            return value ? content : '';
+            return value ? this.render(content, data) : '';
         });
 
         // Handle {{#unless condition}} blocks
         rendered = rendered.replace(/\{\{#unless ([\w.]+)\}\}([\s\S]*?)\{\{\/unless\}\}/g, (match, condition, content) => {
             const value = this.getNestedValue(data, condition);
-            return (!value || (Array.isArray(value) && value.length === 0)) ? content : '';
+            return (!value || (Array.isArray(value) && value.length === 0)) ? this.render(content, data) : '';
         });
 
         // Handle {{> partial}} includes (simplified)
         rendered = rendered.replace(/\{\{> ([\w-]+).*?\}\}/g, (match, partialName) => {
             return `<!-- Partial: ${partialName} -->`;
+        });
+
+        // Replace {{variable}} with data values LAST (after all block processing)
+        rendered = rendered.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+            return data[key] !== undefined ? data[key] : '';
         });
 
         return rendered;

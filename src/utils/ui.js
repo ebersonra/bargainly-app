@@ -79,7 +79,7 @@ const predefinedCategories = [
 
 async function loadUserCategories() {
     try {
-        const user_id = getUserId(); // Remove await since getUserId is synchronous
+        const user_id = await getUserId(); // Await getUserId since it's asynchronous
         if (!user_id) {
             console.error('User ID not found');
             return predefinedCategories;

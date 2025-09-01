@@ -122,7 +122,7 @@ async function getBudgetStatus(user_id, repo = repository) {
       category: budget.category,
       limit: budget.limit,
       spent: spentAmount,
-      percentage: Math.round(percentage * 100) / 100, // Round to 2 decimal places
+      percentage: Number.parseFloat(percentage.toFixed(2)), // Round to 2 decimal places
       alert,
       remaining: Math.max(0, budget.limit - spentAmount)
     };

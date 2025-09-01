@@ -8,7 +8,7 @@
  * @param {number} value - Numeric value
  * @param {Object} options - Formatting options
  * @returns {string} - Formatted currency value
-*/
+ */
 function formatCurrency(value, options = {}) {
   const { 
     currency = 'BRL', 

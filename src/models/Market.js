@@ -139,7 +139,7 @@ class Market {
   static fromCnpjApi(apiData, user_id) {
     return new Market({
       name: apiData.nome || apiData.fantasia || '',
-      address: this.formatAddressFromApi(apiData),
+      address: Market.formatAddressFromApi(apiData),
       cnpj: apiData.cnpj || '',
       phone: apiData.telefone || '',
       email: apiData.email || '',

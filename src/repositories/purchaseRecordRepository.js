@@ -18,7 +18,7 @@ async function insertPurchaseRecord(record) {
     p_value: amount,
     p_source: source || null,
     p_date: purchase_date || new Date().toISOString().slice(0, 10),
-    p_description: description || null // Map description to description
+    p_description: description || null // Add purchase description (opcional)
   });
   if (error) throw new Error(error.message);
   return data;
