@@ -103,7 +103,8 @@ class PurchaseRecord {
    * @returns {string}
    */
   getFormattedDate() {
-    const date = new Date(this.purchase_date + 'T00:00:00');
+    const [year, month, day] = this.purchase_date.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
     return date.toLocaleDateString('pt-BR');
   }
 }

@@ -14,9 +14,50 @@ test('getBudgetStatus calculates percentages and alerts', async () => {
     fetchBudgets: async () => [{ category: 'food', limit: 100 }],
     fetchTotalSpent: async () => [{ category: 'food', amount: 90 }]
   };
-  const result = await service.getBudgetStatus('user1', mockRepo);
+  const result = await service.getBudgetStatus('user1', {}, mockRepo);
   assert.deepStrictEqual(result, [
     { category: 'food', limit: 100, spent: 90, percentage: 90, alert: 'near limit', remaining: 10 }
+  ]);
+});
+
+test('getBudgetStatus applies date range filtering', async () => {
+  const mockRepo = {
+    fetchBudgets: async () => [{ category: 'food', limit: 100 }],
+    fetchTotalSpent: async (user_id, options) => {
+      // Verify options are passed correctly
+      assert.equal(options.startDate, '2025-01-01');
+      assert.equal(options.endDate, '2025-01-31');
+      return [{ category: 'food', amount: 50 }];
+    }
+  };
+  
+  const options = { startDate: '2025-01-01', endDate: '2025-01-31' };
+  const result = await service.getBudgetStatus('user1', options, mockRepo);
+  
+  assert.deepStrictEqual(result, [
+    { category: 'food', limit: 100, spent: 50, percentage: 50, alert: null, remaining: 50 }
+  ]);
+});
+
+test('getBudgetStatus defaults to current month when no date range provided', async () => {
+  const now = new Date();
+  const expectedStartDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+  const expectedEndDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10);
+  
+  const mockRepo = {
+    fetchBudgets: async () => [{ category: 'food', limit: 100 }],
+    fetchTotalSpent: async (user_id, options) => {
+      // Verify default date range is applied
+      assert.equal(options.startDate, expectedStartDate);
+      assert.equal(options.endDate, expectedEndDate);
+      return [{ category: 'food', amount: 30 }];
+    }
+  };
+  
+  const result = await service.getBudgetStatus('user1', {}, mockRepo);
+  
+  assert.deepStrictEqual(result, [
+    { category: 'food', limit: 100, spent: 30, percentage: 30, alert: null, remaining: 70 }
   ]);
 });
 

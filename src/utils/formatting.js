@@ -260,8 +260,16 @@ function removeNonNumeric(str) {
   if (!str || typeof str !== 'string') return '';
   return str.replace(/\D/g, '');
 }
+
 module.exports = {
   formatCurrency,
+  formatCnpj,
+  formatPhone,
+  formatDate,
+  formatDateTime,
+  formatNumber,
+  formatPercentage,
+  truncateText,
   capitalizeWords,
   formatFileSize,
   formatBarcode,

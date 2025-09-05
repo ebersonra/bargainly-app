@@ -85,18 +85,33 @@ async function setBudget(data, repo = repository) {
 /**
  * Get budget status with calculations
  * @param {string} user_id - User ID
+ * @param {Object} options - Query options (date range, category filter)
+ * @param {string} options.startDate - Start date (YYYY-MM-DD) for filtering spending data
+ * @param {string} options.endDate - End date (YYYY-MM-DD) for filtering spending data
+ * @param {string} options.category - Specific category to filter spending data
  * @param {Object} repo - Repository dependency (for testing)
  * @returns {Array} - Array of budget status objects with calculations
  */
-async function getBudgetStatus(user_id, repo = repository) {
+async function getBudgetStatus(user_id, options = {}, repo = repository) {
   if (!user_id) {
     throw new Error('User ID is required');
   }
+
+  // Default to current month if no date range is provided
+  const now = new Date();
+  const defaultStartDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+  const defaultEndDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10);
+  
+  const filterOptions = {
+    startDate: options.startDate || defaultStartDate,
+    endDate: options.endDate || defaultEndDate,
+    category: options.category // Optional category filter
+  };
   
   // Fetch data from repository
   const [budgets, spent] = await Promise.all([
     repo.fetchBudgets(user_id),
-    repo.fetchTotalSpent(user_id)
+    repo.fetchTotalSpent(user_id, filterOptions)
   ]);
 
   // Aggregate spent amounts by category

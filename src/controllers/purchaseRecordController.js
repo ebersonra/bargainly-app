@@ -29,15 +29,19 @@ async function insertPurchaseRecord(data, srv = service) {
 /**
  * Get budget status for a user
  * @param {string} user_id - User ID
+ * @param {Object} options - Query options (date range, category filter)
+ * @param {string} options.startDate - Start date (YYYY-MM-DD) for filtering spending data
+ * @param {string} options.endDate - End date (YYYY-MM-DD) for filtering spending data
+ * @param {string} options.category - Specific category to filter spending data
  * @param {Object} srv - Service dependency (for testing)
  * @returns {Array} - Array of budget status objects
  */
-async function getBudgetStatus(user_id, srv = service) {
+async function getBudgetStatus(user_id, options = {}, srv = service) {
   if (!user_id) {
     throw new Error('User ID is required');
   }
   
-  const budgetData = await srv.getBudgetStatus(user_id);
+  const budgetData = await srv.getBudgetStatus(user_id, options);
   
   // Convert to Budget models for additional methods
   return budgetData.map(data => {

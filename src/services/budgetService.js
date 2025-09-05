@@ -1,14 +1,29 @@
 const { getUserId } = require('../utils/auth');
 
 class BudgetService {
-    async getBudgetStatus() {
+    async getBudgetStatus(options = {}) {
         try {
             const userId = await getUserId();
             if (!userId) {
                 throw new Error('Usuário não identificado');
             }
 
-            const response = await fetch(`/.netlify/functions/get-budget-status?user_id=${userId}`);
+            // Construir query parameters
+            const queryParams = new URLSearchParams({ user_id: userId });
+            
+            if (options.startDate) {
+                queryParams.append('startDate', options.startDate);
+            }
+            
+            if (options.endDate) {
+                queryParams.append('endDate', options.endDate);
+            }
+            
+            if (options.category) {
+                queryParams.append('category', options.category);
+            }
+
+            const response = await fetch(`/.netlify/functions/get-budget-status?${queryParams.toString()}`);
             
             if (!response.ok) {
                 throw new Error('Falha ao carregar metas');
@@ -21,6 +36,30 @@ class BudgetService {
             console.error('Erro ao buscar status do orçamento:', error);
             throw error;
         }
+    }
+
+    async getBudgetStatusForCurrentMonth() {
+        const now = new Date();
+        const startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+        const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10);
+        
+        return this.getBudgetStatus({ startDate, endDate });
+    }
+
+    async getBudgetStatusForPeriod(startDate, endDate) {
+        if (!startDate || !endDate) {
+            throw new Error('Data de início e fim são obrigatórias');
+        }
+        
+        return this.getBudgetStatus({ startDate, endDate });
+    }
+
+    async getBudgetStatusForCategory(category, options = {}) {
+        if (!category) {
+            throw new Error('Categoria é obrigatória');
+        }
+        
+        return this.getBudgetStatus({ ...options, category });
     }
 
     async setBudget({ category, limit }) {
@@ -90,6 +129,45 @@ class BudgetService {
         if (percentage >= 90) return 'warning';
         if (percentage >= 70) return 'caution';
         return 'normal';
+    }
+
+    // Métodos utilitários para períodos comuns
+    getDateRangeOptions() {
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth();
+        
+        return {
+            thisMonth: {
+                startDate: new Date(currentYear, currentMonth, 1).toISOString().slice(0, 10),
+                endDate: new Date(currentYear, currentMonth + 1, 0).toISOString().slice(0, 10),
+                label: 'Este mês'
+            },
+            lastMonth: {
+                startDate: new Date(currentYear, currentMonth - 1, 1).toISOString().slice(0, 10),
+                endDate: new Date(currentYear, currentMonth, 0).toISOString().slice(0, 10),
+                label: 'Mês passado'
+            },
+            last3Months: {
+                startDate: new Date(currentYear, currentMonth - 3, 1).toISOString().slice(0, 10),
+                endDate: new Date(currentYear, currentMonth + 1, 0).toISOString().slice(0, 10),
+                label: 'Últimos 3 meses'
+            },
+            thisYear: {
+                startDate: new Date(currentYear, 0, 1).toISOString().slice(0, 10),
+                endDate: new Date(currentYear, 11, 31).toISOString().slice(0, 10),
+                label: 'Este ano'
+            }
+        };
+    }
+
+    // Validar formato de data
+    isValidDateFormat(dateString) {
+        const regex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!regex.test(dateString)) return false;
+        
+        const date = new Date(dateString);
+        return date.toISOString().slice(0, 10) === dateString;
     }
 }
 

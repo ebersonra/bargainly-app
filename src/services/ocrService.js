@@ -209,7 +209,7 @@ async function extractPurchaseDataFromText(text, options = {}) {
 async function callOcrApi(imageData, options = {}) {
   // Fallback: return empty string and log a warning
   console.warn('Warning: OCR service not implemented - returning empty string as fallback.');
-  return '';
+  throw new Error("OCR service not implemented. Please integrate with an OCR provider.");
 }
 
 /**

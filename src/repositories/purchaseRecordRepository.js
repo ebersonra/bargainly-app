@@ -61,16 +61,32 @@ async function upsertBudget(budget) {
   return { ...result, category: budget.category, limit: result?.target_value };
 }
 
-async function fetchTotalSpent(user_id) {
+async function fetchTotalSpent(user_id, options = {}) {
   const supabase = getClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from('purchase_records')
-    .select('value, purchase_categories(name)')
+    .select('value, purchase_categories(name), purchase_date')
     .eq('user_id', user_id);
+
+  // Apply date range filters if provided
+  if (options.startDate) {
+    query = query.gte('purchase_date', options.startDate);
+  }
+  if (options.endDate) {
+    query = query.lte('purchase_date', options.endDate);
+  }
+
+  // Apply category filter if provided
+  if (options.category) {
+    query = query.eq('purchase_categories.name', options.category);
+  }
+
+  const { data, error } = await query;
   if (error) throw new Error(error.message);
   return (data || []).map(r => ({
     category: r.purchase_categories?.name,
-    amount: r.value
+    amount: r.value,
+    purchase_date: r.purchase_date
   }));
 }
 

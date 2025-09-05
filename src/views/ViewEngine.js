@@ -449,7 +449,6 @@ class ViewEngine {
 // Export for browser and Node.js
 if (typeof window !== 'undefined') {
     window.ViewEngine = ViewEngine;
-    window.viewEngine = new ViewEngine();
 } else if (typeof module !== 'undefined' && module.exports) {
     module.exports = ViewEngine;
 }

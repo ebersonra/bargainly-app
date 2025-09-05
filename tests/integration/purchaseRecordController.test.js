@@ -20,9 +20,9 @@ test('controller integrates with service to get budget status', async () => {
     fetchTotalSpent: async () => [{ category: 'food', amount: 50 }]
   };
   const mockService = {
-    getBudgetStatus: (user_id) => service.getBudgetStatus(user_id, mockRepo)
+    getBudgetStatus: (user_id, options) => service.getBudgetStatus(user_id, options, mockRepo)
   };
-  const result = await controller.getBudgetStatus('user1', mockService);
+  const result = await controller.getBudgetStatus('user1', {}, mockService);
   // Controller returns Budget instances, so check if the data structure matches
   assert.equal(result.length, 1);
   assert.equal(result[0].category, 'food');

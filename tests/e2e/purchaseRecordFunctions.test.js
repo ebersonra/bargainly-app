@@ -22,13 +22,40 @@ test('get-budget-status handler returns data with percentages', async () => {
     fetchTotalSpent: async () => [{ category: 'food', amount: 40 }]
   };
   const mockController = {
-    getBudgetStatus: (user_id) => service.getBudgetStatus(user_id, mockRepo)
+    getBudgetStatus: (user_id, options) => service.getBudgetStatus(user_id, options, mockRepo)
   };
   const handler = buildGet(mockController);
   const event = { httpMethod: 'GET', queryStringParameters: { user_id: 'u1' } };
   const res = await handler(event);
   const body = JSON.parse(res.body);
   assert.equal(body[0].percentage, 40);
+});
+
+test('get-budget-status handler accepts date range filters', async () => {
+  const mockRepo = {
+    fetchBudgets: async () => [{ category: 'food', limit: 100 }],
+    fetchTotalSpent: async (user_id, options) => {
+      // Verify filtering options are passed through
+      assert.equal(options.startDate, '2025-01-01');
+      assert.equal(options.endDate, '2025-01-31');
+      return [{ category: 'food', amount: 25 }];
+    }
+  };
+  const mockController = {
+    getBudgetStatus: (user_id, options) => service.getBudgetStatus(user_id, options, mockRepo)
+  };
+  const handler = buildGet(mockController);
+  const event = { 
+    httpMethod: 'GET', 
+    queryStringParameters: { 
+      user_id: 'u1',
+      startDate: '2025-01-01',
+      endDate: '2025-01-31'
+    } 
+  };
+  const res = await handler(event);
+  const body = JSON.parse(res.body);
+  assert.equal(body[0].percentage, 25);
 });
 
 test('set-budget handler returns 200', async () => {
