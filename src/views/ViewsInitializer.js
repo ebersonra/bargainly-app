@@ -13,7 +13,8 @@ class ViewsInitializer {
       // Initialize view engine
       if (typeof window !== 'undefined' && window.ViewEngine) {
         this.viewEngine = new window.ViewEngine();
-        window.viewEngine = this.viewEngine;
+        // Optional: Create global instance for backwards compatibility if needed
+        // window.viewEngine = this.viewEngine;
       }
 
       // Initialize navigation

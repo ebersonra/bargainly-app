@@ -368,8 +368,11 @@ test('ViewEngine - Browser environment export', async () => {
   require('../../src/views/ViewEngine.js');
   
   assert.ok(global.window.ViewEngine, 'Should export ViewEngine to window in browser');
-  assert.ok(global.window.viewEngine, 'Should create global viewEngine instance in browser');
-  assert.ok(global.window.viewEngine instanceof global.window.ViewEngine, 'Global instance should be instance of ViewEngine');
+  assert.ok(typeof global.window.ViewEngine === 'function', 'ViewEngine should be a constructor function');
+  
+  // Test that we can create instances manually
+  const instance = new global.window.ViewEngine();
+  assert.ok(instance instanceof global.window.ViewEngine, 'Should be able to create ViewEngine instances');
   
   // Clean up
   delete global.window;

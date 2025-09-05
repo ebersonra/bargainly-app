@@ -4,7 +4,8 @@
  */
 class NavigationController {
   constructor(viewEngine) {
-    this.viewEngine = viewEngine || window.viewEngine;
+    // Create a new ViewEngine instance if none provided
+    this.viewEngine = viewEngine || (typeof window !== 'undefined' && window.ViewEngine ? new window.ViewEngine() : null);
     this.currentPage = this.getCurrentPage();
     this.navItems = this.getNavItems();
     this.init();
