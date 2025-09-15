@@ -5,7 +5,8 @@
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "netlify-cli": "^22.2.2"
+    "netlify-cli": "^22.2.2",
+    "supertest": "^7.1.4"
   },
   "scripts": {
     "test": "node --test",
