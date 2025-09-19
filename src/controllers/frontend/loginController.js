@@ -189,6 +189,20 @@ class LoginController {
     }
 
     async checkAuthAndRedirect() {
+        // Wait for Supabase to be initialized
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        while (!window.supabase?.auth && attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            attempts++;
+        }
+        
+        if (!window.supabase?.auth) {
+            console.warn('Supabase not available after waiting, continuing to login page');
+            return;
+        }
+        
         // Check if user is already logged in
         try {
             const isAuth = await (window.isAuthenticated ? window.isAuthenticated() : false);
@@ -212,14 +226,19 @@ if (typeof window === 'undefined') {
 } else {
     window.LoginController = LoginController;
     
-    // Auto-initialize when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
+    // Initialize when DOM is ready and wait a bit for other scripts
+    function initializeLoginController() {
+        // Wait a bit for Supabase and other utilities to load
+        setTimeout(() => {
             const loginController = new LoginController();
             loginController.initialize();
-        });
+        }, 100);
+    }
+    
+    // Auto-initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeLoginController);
     } else {
-        const loginController = new LoginController();
-        loginController.initialize();
+        initializeLoginController();
     }
 }

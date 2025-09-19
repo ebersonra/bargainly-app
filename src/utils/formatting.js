@@ -261,17 +261,35 @@ function removeNonNumeric(str) {
   return str.replace(/\D/g, '');
 }
 
-module.exports = {
-  formatCurrency,
-  formatCnpj,
-  formatPhone,
-  formatDate,
-  formatDateTime,
-  formatNumber,
-  formatPercentage,
-  truncateText,
-  capitalizeWords,
-  formatFileSize,
-  formatBarcode,
-  removeNonNumeric
-};
+// Browser compatibility check
+if (typeof window === 'undefined') {
+  // Node.js environment - export as module
+  module.exports = {
+    formatCurrency,
+    formatCnpj,
+    formatPhone,
+    formatDate,
+    formatDateTime,
+    formatNumber,
+    formatPercentage,
+    truncateText,
+    capitalizeWords,
+    formatFileSize,
+    formatBarcode,
+    removeNonNumeric
+  };
+} else {
+  // Browser environment - make functions globally available
+  window.formatCurrency = formatCurrency;
+  window.formatCnpj = formatCnpj;
+  window.formatPhone = formatPhone;
+  window.formatDate = formatDate;
+  window.formatDateTime = formatDateTime;
+  window.formatNumber = formatNumber;
+  window.formatPercentage = formatPercentage;
+  window.truncateText = truncateText;
+  window.capitalizeWords = capitalizeWords;
+  window.formatFileSize = formatFileSize;
+  window.formatBarcode = formatBarcode;
+  window.removeNonNumeric = removeNonNumeric;
+}

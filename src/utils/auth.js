@@ -1,15 +1,16 @@
 // Supabase Authentication utilities
 async function getUserId() {
-    // First check if we have a cached user ID in sessionStorage
-    const cachedUserId = sessionStorage.getItem('user_id');
-    if (cachedUserId) {
-        return cachedUserId;
-    }
-    
     // Check if Supabase client is available
     if (!window.supabase?.auth) {
-        console.error('Supabase client not available');
-        return null;
+        // Wait a bit for Supabase to initialize if we're early in the page load
+        if (document.readyState === 'loading') {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
+        if (!window.supabase?.auth) {
+            console.warn('Supabase client not available for getUserId');
+            return null;
+        }
     }
     
     try {
@@ -17,6 +18,8 @@ async function getUserId() {
         
         if (error) {
             console.error('Error getting session:', error);
+            // Clear any cached data if there's an error
+            clearUserId();
             return null;
         }
         
@@ -27,9 +30,13 @@ async function getUserId() {
             return userId;
         }
         
+        // No valid session, clear any cached data
+        clearUserId();
         return null;
     } catch (error) {
         console.error('Error in getUserId:', error);
+        // Clear any cached data if there's an error
+        clearUserId();
         return null;
     }
 }
@@ -48,6 +55,10 @@ function clearUserId() {
     
     // Clear cookie
     document.cookie = 'user_id=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    
+    // Also clear any other auth-related storage
+    localStorage.removeItem('supabase.auth.token');
+    localStorage.removeItem('sb-' + window.location.hostname + '-auth-token');
 }
 
 async function isAuthenticated() {
@@ -56,16 +67,26 @@ async function isAuthenticated() {
 }
 
 async function checkAuth() {
+    // Check if we're in the process of logging out
+    if (sessionStorage.getItem('logging_out') === 'true') {
+        return false; // Don't redirect, let the logout process complete
+    }
+    
     const authenticated = await isAuthenticated();
     if (!authenticated) {
-        // Redirect to login if not authenticated
-        window.location.href = '/login.html';
+        // Only redirect if we're not already on the login page
+        if (!window.location.pathname.includes('login.html')) {
+            window.location.href = '/login.html';
+        }
         return false;
     }
     return true;
 }
 
 async function signOut() {
+    // Set a flag to indicate we're logging out
+    sessionStorage.setItem('logging_out', 'true');
+    
     if (window.supabase?.auth) {
         try {
             const { error } = await window.supabase.auth.signOut();
@@ -80,6 +101,11 @@ async function signOut() {
     // Clear local storage
     clearUserId();
     
+    // Clear the logout flag after a short delay
+    setTimeout(() => {
+        sessionStorage.removeItem('logging_out');
+    }, 1000);
+    
     // Redirect to login
     window.location.href = '/login.html';
 }
@@ -92,9 +118,13 @@ function initAuthListener() {
             
             if (event === 'SIGNED_IN' && session) {
                 setUserId(session.user.id);
+                // Clear any logout flags
+                sessionStorage.removeItem('logging_out');
             } else if (event === 'SIGNED_OUT') {
                 clearUserId();
-                if (!window.location.pathname.includes('login.html')) {
+                // Only redirect if we're not already on login page and not in logout process
+                if (!window.location.pathname.includes('login.html') && 
+                    sessionStorage.getItem('logging_out') !== 'true') {
                     window.location.href = '/login.html';
                 }
             }

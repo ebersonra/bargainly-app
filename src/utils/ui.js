@@ -26,8 +26,11 @@ function ensureGetUserId() {
     };
 }
 
-// Get the getUserId function with fallback
-const getUserId = ensureGetUserId();
+// Helper function to get user ID with fallback
+async function getUIUserId() {
+    const getUserIdFn = ensureGetUserId();
+    return await getUserIdFn();
+}
 
 function showNotification(message, type = 'info') {
     // Create notification element
@@ -109,7 +112,7 @@ const predefinedCategories = [
 
 async function loadUserCategories() {
     try {
-        const user_id = await getUserId(); // Use the ensured getUserId function
+        const user_id = await getUIUserId(); // Use the renamed function
         if (!user_id) {
             console.error('User ID not found');
             return predefinedCategories;

@@ -155,8 +155,9 @@ class NavigationController {
     // Logout functionality
     const logoutBtn = document.querySelector('.nav-logout');
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', () => {
-        this.logout();
+      logoutBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        await this.logout();
       });
     }
 
@@ -186,12 +187,28 @@ class NavigationController {
     });
   }
 
-  logout() {
-    // Clear user cookie
-    document.cookie = 'user_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    
-    // Redirect to login
-    window.location.href = '/login.html';
+  async logout() {
+    try {
+      // Use the proper signOut function from auth utilities
+      if (typeof window !== 'undefined' && window.signOut) {
+        await window.signOut();
+      } else {
+        // Fallback: Clear user data and redirect
+        document.cookie = 'user_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        sessionStorage.removeItem('user_id');
+        
+        // Sign out from Supabase if available
+        if (window.supabase?.auth) {
+          await window.supabase.auth.signOut();
+        }
+        
+        window.location.href = '/login.html';
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Force redirect even if logout fails
+      window.location.href = '/login.html';
+    }
   }
 }
 
