@@ -300,8 +300,8 @@ function showUsage() {
   console.log('Target examples:');
   console.log('  node run-migration.js init.sql           - Run init.sql');
   console.log('  node run-migration.js 202509050001       - Run all files in folder 202509050001');
-  console.log('  node run-migration.js shopping_lists_schema.sql - Run specific file by name');
-  console.log('  node run-migration.js 202509050001/shopping_lists_schema.sql - Run specific path');
+  console.log('  node run-migration.js budget_schema.sql  - Run specific file by name');
+  console.log('  node run-migration.js 202509050001/budget_schema.sql - Run specific path');
   console.log('  node run-migration.js init.sql --show    - Just show the SQL content');
   console.log('');
   console.log('Available migrations:');
