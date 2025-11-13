@@ -174,6 +174,7 @@
     <script src="/src/utils/auth.js"></script>
     <script src="/src/utils/ui.js"></script>
     <script src="/src/utils/formatting.js"></script>
+    <script src="/static/js/utils.js"></script>
     <!-- Views System -->
     <script src="/src/views/ViewEngine.js"></script>
     <script src="/src/views/NavigationController.js"></script>
@@ -203,12 +204,45 @@
 
             async loadCategories() {
                 try {
-                    // Load categories for the select
-                    if (typeof window !== 'undefined' && window.populatePurchaseCategorySelect) {
+                    // Wait for the populatePurchaseCategorySelect function to be available
+                    let retries = 0;
+                    const maxRetries = 10;
+                    
+                    while (!window.populatePurchaseCategorySelect && retries < maxRetries) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        retries++;
+                    }
+                    
+                    if (window.populatePurchaseCategorySelect) {
                         await window.populatePurchaseCategorySelect('budgetCategory');
+                    } else {
+                        console.error('populatePurchaseCategorySelect function not available');
+                        // Fallback to basic categories
+                        this.loadBasicCategories();
                     }
                 } catch (error) {
                     console.error('Erro ao carregar categorias:', error);
+                    // Fallback to basic categories
+                    this.loadBasicCategories();
+                }
+            }
+
+            loadBasicCategories() {
+                const select = document.getElementById('budgetCategory');
+                if (select) {
+                    const basicCategories = [
+                        'Bebidas', 'Açougue', 'Padaria', 'Laticínios', 'Mercearia',
+                        'Higiene', 'Limpeza', 'Frutas', 'Verduras e Legumes',
+                        'Congelados', 'Doces e Sobremesas', 'Café e Cereais Matinais',
+                        'Enlatados e Conservas', 'Outros'
+                    ];
+                    
+                    let options = '<option value="">Selecione uma categoria</option>';
+                    options += basicCategories.map(category => 
+                        `<option value="${category}">${category}</option>`
+                    ).join('');
+                    
+                    select.innerHTML = options;
                 }
             }
 
@@ -352,7 +386,7 @@
 
             async createBudget(data) {
                 try {
-                    const userId = this.getUserId();
+                    const userId = await this.getUserId();
                     if (!userId) {
                         throw new Error('Usuário não autenticado');
                     }
@@ -391,7 +425,7 @@
                 this.showLoading(container);
 
                 try {
-                    const userId = this.getUserId();
+                    const userId = await this.getUserId();
                     if (!userId) {
                         throw new Error('Usuário não autenticado');
                     }
@@ -512,9 +546,9 @@
             }
 
             // Utility methods
-            getUserId() {
+            async getUserId() {
                 if (typeof window !== 'undefined' && window.getUserId) {
-                    return window.getUserId();
+                    return await window.getUserId();
                 }
                 
                 // Fallback to cookie parsing

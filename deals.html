@@ -136,6 +136,7 @@
     <script src="/src/utils/auth.js"></script>
     <script src="/src/utils/ui.js"></script>
     <script src="/src/utils/formatting.js"></script>
+    <script src="/static/js/utils.js"></script>
     <!-- Views System -->
     <script src="/src/views/ViewEngine.js"></script>
     <script src="/src/views/NavigationController.js"></script>
@@ -143,5 +144,35 @@
     <!-- Page Controllers -->
     <!-- TODO: Create dealsController in src/controllers/frontend/ -->
     <script src="/src/controllers/frontend/dashboardController.js"></script>
+
+    <!-- Deals page initialization -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize category and market filters
+            try {
+                // Wait for utils to be available
+                let retries = 0;
+                const maxRetries = 10;
+                
+                while ((!window.populatePurchaseCategorySelect || !window.populateMarketSelect) && retries < maxRetries) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    retries++;
+                }
+                
+                // Populate filters
+                if (window.populatePurchaseCategorySelect) {
+                    await window.populatePurchaseCategorySelect('filterCategory', true);
+                }
+                
+                if (window.populateMarketSelect) {
+                    await window.populateMarketSelect('filterMarket', true);
+                }
+                
+                console.log('Deals page filters initialized');
+            } catch (error) {
+                console.error('Error initializing deals page filters:', error);
+            }
+        });
+    </script>
 </body>
 </html>

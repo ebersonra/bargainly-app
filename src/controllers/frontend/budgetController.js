@@ -98,8 +98,8 @@ class BudgetController {
     async initialize() {
         try {
             // Populate category select if it exists
-            if (typeof window !== 'undefined' && window.populateCategorySelect) {
-                window.populateCategorySelect('budgetCategory', false);
+            if (typeof window !== 'undefined' && window.populatePurchaseCategorySelect) {
+                await window.populatePurchaseCategorySelect('budgetCategory', true);
             }
             
             // Load existing budgets

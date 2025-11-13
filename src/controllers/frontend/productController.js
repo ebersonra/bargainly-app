@@ -171,6 +171,14 @@ class ProductController {
         }
 
         try {
+            // Get user ID
+            const userId = typeof window !== 'undefined' && window.getUserId ? 
+                await window.getUserId() : null;
+                
+            if (!userId) {
+                throw new Error('Usuário não autenticado');
+            }
+            
             // Make API call to create product
             const response = await fetch('/.netlify/functions/create-products', {
                 method: 'POST',
@@ -178,7 +186,8 @@ class ProductController {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    marketId,
+                    user_id: userId,
+                    mercadoId: marketId,
                     nome,
                     unidade,
                     valor,

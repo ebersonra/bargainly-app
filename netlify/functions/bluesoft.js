@@ -7,10 +7,17 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
   
 exports.handler = async function(event) {
 
-    const codigoBarras = event.queryStringParameters.codigo;
+    const codigoBarras = event.queryStringParameters.gtin;
 
     if (event.httpMethod !== 'GET') {
         return { statusCode: 405, body: 'Method Not Allowed' };
+    }
+
+    if (!codigoBarras) {
+        return { 
+            statusCode: 400, 
+            body: JSON.stringify({ error: 'Parâmetro gtin é obrigatório' }) 
+        };
     }
 
     try {
