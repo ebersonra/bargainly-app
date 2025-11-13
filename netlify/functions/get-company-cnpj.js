@@ -8,7 +8,7 @@ const { createClient } = require("@supabase/supabase-js");
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_API_KEY
+  process.env.SUPABASE_SERVICE_API_KEY
 );
 
 const CACHE_EXPIRATION_MINUTES = 1440; // 24h

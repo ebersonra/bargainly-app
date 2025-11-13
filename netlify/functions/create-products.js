@@ -46,8 +46,8 @@ exports.handler = async function(event) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': process.env.SUPABASE_API_KEY,
-        'Authorization': `Bearer ${process.env.SUPABASE_API_KEY}`,
+        'apikey': process.env.SUPABASE_SERVICE_API_KEY,
+        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_API_KEY}`,
         'Prefer': 'return=representation'
       },
       body

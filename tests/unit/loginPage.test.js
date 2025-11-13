@@ -1,7 +1,7 @@
-import { test } from 'node:test';
-import { strict as assert } from 'node:assert';
-import fs from 'fs';
-import path from 'path';
+const { test } = require('node:test');
+const { strict: assert } = require('node:assert');
+const fs = require('fs');
+const path = require('path');
 
 test('Login page HTML structure and styling', () => {
   const loginHtmlPath = path.join(process.cwd(), 'login.html');

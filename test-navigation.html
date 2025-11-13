@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Navigation</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #nav-menu { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+        .nav-link { display: inline-block; margin: 5px; padding: 5px 10px; background: #007bff; color: white; text-decoration: none; }
+        .nav-link.active { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Teste Navigation</h1>
+    <div id="nav-menu">Carregando...</div>
+    
+    <script src="/src/views/ViewEngine.js"></script>
+    <script src="/src/views/NavigationController.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('DOM carregado');
+            
+            // Teste direto do ViewEngine primeiro
+            const testTemplate = `
+                <ul>
+                    {{#each navItems}}
+                    <li><a href="{{href}}" class="nav-link {{#if isActive}}active{{/if}}">{{label}}</a></li>
+                    {{/each}}
+                </ul>
+            `;
+            
+            const testData = {
+                navItems: [
+                    { href: '/index.html', label: 'Início', isActive: true },
+                    { href: '/products.html', label: 'Produtos', isActive: false }
+                ]
+            };
+            
+            console.log('Testando ViewEngine diretamente:');
+            const result = window.viewEngine.render(testTemplate, testData);
+            console.log('Resultado:', result);
+            
+            // Inserir resultado do teste direto
+            document.getElementById('nav-menu').innerHTML = result;
+            
+            // Aguardar um pouco e testar carregamento de template
+            setTimeout(async () => {
+                try {
+                    console.log('Testando carregamento de template:');
+                    const templateResult = await window.viewEngine.renderView('components/navigation', testData);
+                    console.log('Template renderizado:', templateResult);
+                } catch (error) {
+                    console.error('Erro ao carregar template:', error);
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

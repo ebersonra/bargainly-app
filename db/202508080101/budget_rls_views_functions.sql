@@ -94,7 +94,8 @@ CREATE OR REPLACE FUNCTION insert_purchase_record(
   p_category text,
   p_value numeric,
   p_source text,
-  p_date date
+  p_date date,
+  p_description text DEFAULT NULL
 ) RETURNS purchase_records AS $$
 DECLARE
   v_category_id uuid;
@@ -108,8 +109,8 @@ BEGIN
     RAISE EXCEPTION 'Category % not found for user %', p_category, p_user_id;
   END IF;
 
-  INSERT INTO purchase_records (user_id, category_id, value, source, purchase_date)
-  VALUES (p_user_id, v_category_id, p_value, p_source, p_date)
+  INSERT INTO purchase_records (user_id, category_id, value, source, purchase_date, description)
+  VALUES (p_user_id, v_category_id, p_value, p_source, p_date, p_description)
   RETURNING * INTO v_record;
 
   RETURN v_record;

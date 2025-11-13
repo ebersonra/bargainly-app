@@ -201,10 +201,13 @@ test('Currency formatting utility', async () => {
 
 test('Date formatting utility', async () => {
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
+    // Create date with explicit UTC to avoid timezone issues
+    const date = new Date(dateString + 'T12:00:00.000Z');
+    return date.toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
+      timeZone: 'UTC'
     });
   };
   

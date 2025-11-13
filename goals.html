@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
+    <!-- Navigation placeholder -->
+    <div id="nav-menu"></div>
+    
     <div class="container">
         <div class="page-header">
             <h1>Metas e Orçamento</h1>
@@ -38,6 +41,37 @@
                         </div>
                         <button type="submit" class="btn btn-primary">Cadastrar Meta</button>
                     </form>
+                </div>
+            </div>
+
+            <div class="card mt-8">
+                <div class="card-header">
+                    <div class="flex justify-between items-center">
+                        <h2>Filtros de Período</h2>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label for="periodSelect">Período Predefinido</label>
+                            <select id="periodSelect">
+                                <option value="">Selecione um período</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="startDate">Data Início</label>
+                            <input type="date" id="startDate" placeholder="Data de início">
+                        </div>
+                        <div class="input-group">
+                            <label for="endDate">Data Fim</label>
+                            <input type="date" id="endDate" placeholder="Data de fim">
+                        </div>
+                        <div class="input-group">
+                            <button type="button" id="clearFilters" class="btn btn-secondary">
+                                🔄 Limpar Filtros
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -95,23 +129,69 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/static/js/mvc/components/Navigation.js"></script>
-    <script src="/static/js/mvc/controllers/BaseController.js"></script>
-    <script src="/static/js/auth.js"></script>
+    <script>
+        // Initialize Supabase client
+        let supabaseClient = null;
+        
+        fetch('/.netlify/functions/get-env')
+          .then(res => res.json())
+          .then(env => {
+            if (env.SUPABASE_URL && env.SUPABASE_PUBLISHABLE_KEY) {
+              supabaseClient = supabase.createClient(env.SUPABASE_URL, env.SUPABASE_PUBLISHABLE_KEY);
+              window.supabase = supabaseClient;
+              
+              console.log('Supabase client initialized successfully');
+              
+              // Initialize authentication
+              initializeAuth();
+            } else {
+              console.error('Missing Supabase credentials');
+            }
+          })
+          .catch(error => {
+            console.error('Failed to load environment variables:', error);
+          });
+          
+        async function initializeAuth() {
+          // Load auth utilities first
+          await new Promise(resolve => {
+            if (window.checkAuth) {
+              resolve();
+            } else {
+              setTimeout(resolve, 1000);
+            }
+          });
+          
+          // Check authentication
+          try {
+            await window.checkAuth();
+          } catch (error) {
+            console.error('Authentication check failed:', error);
+            window.location.href = '/login.html';
+          }
+        }
+    </script>
+    <script src="/src/utils/auth.js"></script>
+    <script src="/src/utils/ui.js"></script>
+    <script src="/src/utils/formatting.js"></script>
     <script src="/static/js/utils.js"></script>
-    <script src="/static/js/bargainly-app.js"></script>
-    <script src="/static/js/budgets-app.js"></script>
+    <!-- Views System -->
+    <script src="/src/views/ViewEngine.js"></script>
+    <script src="/src/views/NavigationController.js"></script>
+    <script src="/src/views/ViewsInitializer.js"></script>
 
     <script>
         // Goals page specific controller
-        class GoalsController extends BaseController {
+        class GoalsController {
             constructor() {
-                super();
+                this.currentFilters = {};
                 this.init();
             }
 
             init() {
                 this.setCurrentMonth();
+                this.loadCategories();
+                this.setupPeriodFilters();
                 this.loadBudgets();
                 this.setupEventListeners();
             }
@@ -122,33 +202,216 @@
                 document.getElementById('budgetMonth').value = currentMonth;
             }
 
+            async loadCategories() {
+                try {
+                    // Wait for the populatePurchaseCategorySelect function to be available
+                    let retries = 0;
+                    const maxRetries = 10;
+                    
+                    while (!window.populatePurchaseCategorySelect && retries < maxRetries) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        retries++;
+                    }
+                    
+                    if (window.populatePurchaseCategorySelect) {
+                        await window.populatePurchaseCategorySelect('budgetCategory');
+                    } else {
+                        console.error('populatePurchaseCategorySelect function not available');
+                        // Fallback to basic categories
+                        this.loadBasicCategories();
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar categorias:', error);
+                    // Fallback to basic categories
+                    this.loadBasicCategories();
+                }
+            }
+
+            loadBasicCategories() {
+                const select = document.getElementById('budgetCategory');
+                if (select) {
+                    const basicCategories = [
+                        'Bebidas', 'Açougue', 'Padaria', 'Laticínios', 'Mercearia',
+                        'Higiene', 'Limpeza', 'Frutas', 'Verduras e Legumes',
+                        'Congelados', 'Doces e Sobremesas', 'Café e Cereais Matinais',
+                        'Enlatados e Conservas', 'Outros'
+                    ];
+                    
+                    let options = '<option value="">Selecione uma categoria</option>';
+                    options += basicCategories.map(category => 
+                        `<option value="${category}">${category}</option>`
+                    ).join('');
+                    
+                    select.innerHTML = options;
+                }
+            }
+
             setupEventListeners() {
                 const form = document.getElementById('budgetForm');
-                this.handleFormSubmission(form, (data) => this.createBudget(data));
+                if (form) {
+                    form.addEventListener('submit', (e) => this.handleFormSubmit(e));
+                }
 
                 document.getElementById('refreshBudgets')?.addEventListener('click', () => {
                     this.loadBudgets();
                 });
+
+                document.getElementById('clearFilters')?.addEventListener('click', () => {
+                    this.clearFilters();
+                });
+            }
+
+            setupPeriodFilters() {
+                // Setup period selector
+                const periodSelect = document.getElementById('periodSelect');
+                if (periodSelect) {
+                    const periods = this.getDateRangeOptions();
+                    
+                    // Populate options
+                    periodSelect.innerHTML = '<option value="">Selecione um período</option>';
+                    Object.entries(periods).forEach(([key, period]) => {
+                        const option = document.createElement('option');
+                        option.value = key;
+                        option.textContent = period.label;
+                        periodSelect.appendChild(option);
+                    });
+                    
+                    // Add event listener
+                    periodSelect.addEventListener('change', (e) => {
+                        if (e.target.value) {
+                            this.handlePeriodChange(e.target.value);
+                        }
+                    });
+                }
+                
+                // Setup custom date inputs
+                const startDateInput = document.getElementById('startDate');
+                const endDateInput = document.getElementById('endDate');
+                
+                if (startDateInput && endDateInput) {
+                    const updateDateRange = () => this.handleCustomDateRange();
+                    startDateInput.addEventListener('change', updateDateRange);
+                    endDateInput.addEventListener('change', updateDateRange);
+                }
+            }
+
+            getDateRangeOptions() {
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                const currentMonth = now.getMonth();
+                
+                return {
+                    thisMonth: {
+                        startDate: new Date(currentYear, currentMonth, 1).toISOString().slice(0, 10),
+                        endDate: new Date(currentYear, currentMonth + 1, 0).toISOString().slice(0, 10),
+                        label: 'Este mês'
+                    },
+                    lastMonth: {
+                        startDate: new Date(currentYear, currentMonth - 1, 1).toISOString().slice(0, 10),
+                        endDate: new Date(currentYear, currentMonth, 0).toISOString().slice(0, 10),
+                        label: 'Mês passado'
+                    },
+                    last3Months: {
+                        startDate: new Date(currentYear, currentMonth - 3, 1).toISOString().slice(0, 10),
+                        endDate: new Date(currentYear, currentMonth + 1, 0).toISOString().slice(0, 10),
+                        label: 'Últimos 3 meses'
+                    },
+                    thisYear: {
+                        startDate: new Date(currentYear, 0, 1).toISOString().slice(0, 10),
+                        endDate: new Date(currentYear, 11, 31).toISOString().slice(0, 10),
+                        label: 'Este ano'
+                    }
+                };
+            }
+
+            handlePeriodChange(periodKey) {
+                const periods = this.getDateRangeOptions();
+                const selectedPeriod = periods[periodKey];
+                
+                if (selectedPeriod) {
+                    // Update date inputs
+                    document.getElementById('startDate').value = selectedPeriod.startDate;
+                    document.getElementById('endDate').value = selectedPeriod.endDate;
+                    
+                    // Update filters and reload
+                    this.currentFilters = {
+                        startDate: selectedPeriod.startDate,
+                        endDate: selectedPeriod.endDate
+                    };
+                    this.loadBudgets();
+                }
+            }
+
+            handleCustomDateRange() {
+                const startDate = document.getElementById('startDate')?.value;
+                const endDate = document.getElementById('endDate')?.value;
+                
+                if (startDate && endDate) {
+                    // Clear period select
+                    document.getElementById('periodSelect').value = '';
+                    
+                    // Update filters and reload
+                    this.currentFilters = { startDate, endDate };
+                    this.loadBudgets();
+                }
+            }
+
+            clearFilters() {
+                // Clear all inputs
+                document.getElementById('periodSelect').value = '';
+                document.getElementById('startDate').value = '';
+                document.getElementById('endDate').value = '';
+                
+                // Clear filters and reload with defaults
+                this.currentFilters = {};
+                this.loadBudgets();
+            }
+
+            async handleFormSubmit(e) {
+                e.preventDefault();
+                
+                try {
+                    const formData = new FormData(e.target);
+                    const data = {
+                        category: formData.get('category'),
+                        limit: parseFloat(formData.get('limit')),
+                        month: formData.get('month')
+                    };
+
+                    await this.createBudget(data);
+                } catch (error) {
+                    this.showError('Erro ao processar formulário: ' + error.message);
+                }
             }
 
             async createBudget(data) {
                 try {
-                    const userId = this.getUserIdFromCookie();
+                    const userId = await this.getUserId();
                     if (!userId) {
                         throw new Error('Usuário não autenticado');
                     }
 
-                    // Use existing budget functionality if available
-                    if (typeof window.submitBudget === 'function') {
-                        await window.submitBudget({
+                    const response = await fetch('/.netlify/functions/set-budget', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
                             user_id: userId,
                             category: data.category,
-                            limit: parseFloat(data.limit),
+                            limit: data.limit,
                             month: data.month
-                        });
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `Erro ${response.status}: ${response.statusText}`);
                     }
 
-                    this.showSuccess('Meta cadastrada com sucesso!', document.getElementById('budgetForm').parentElement);
+                    const result = await response.json();
+                    
+                    this.showSuccess('Meta cadastrada com sucesso!');
                     document.getElementById('budgetForm').reset();
                     this.setCurrentMonth();
                     await this.loadBudgets();
@@ -162,33 +425,99 @@
                 this.showLoading(container);
 
                 try {
-                    // Use existing budget loading if available
-                    if (typeof window.loadBudgets === 'function') {
-                        await window.loadBudgets();
+                    const userId = await this.getUserId();
+                    if (!userId) {
+                        throw new Error('Usuário não autenticado');
                     }
-                    await this.updateBudgetSummary();
+
+                    // Build query parameters with filters
+                    const queryParams = new URLSearchParams({ user_id: userId });
+                    
+                    if (this.currentFilters.startDate) {
+                        queryParams.append('startDate', this.currentFilters.startDate);
+                    }
+                    
+                    if (this.currentFilters.endDate) {
+                        queryParams.append('endDate', this.currentFilters.endDate);
+                    }
+                    
+                    if (this.currentFilters.category) {
+                        queryParams.append('category', this.currentFilters.category);
+                    }
+
+                    const response = await fetch(`/.netlify/functions/get-budget-status?${queryParams.toString()}`);
+                    if (!response.ok) {
+                        throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                    }
+
+                    const budgets = await response.json();
+                    this.displayBudgets(budgets);
+                    await this.updateBudgetSummary(budgets);
                 } catch (error) {
-                    this.showError('Erro ao carregar metas: ' + error.message, container.parentElement);
+                    this.showError('Erro ao carregar metas: ' + error.message);
                 } finally {
                     this.hideLoading(container);
                 }
             }
 
-            async updateBudgetSummary() {
-                try {
-                    const userId = this.getUserIdFromCookie();
-                    if (!userId) return;
+            displayBudgets(budgets) {
+                const container = document.getElementById('budgetsList');
+                
+                if (!budgets || budgets.length === 0) {
+                    const hasFilters = Object.keys(this.currentFilters).length > 0;
+                    const emptyMessage = hasFilters 
+                        ? 'Nenhuma meta encontrada para o período selecionado'
+                        : 'Nenhuma meta cadastrada';
+                    const emptyDescription = hasFilters
+                        ? 'Tente alterar o período ou limpar os filtros'
+                        : 'Cadastre suas primeiras metas de orçamento';
+                        
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 11H7v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-9h-2v9H9v-9z"/>
+                                <path d="M13 2.05v3.03c3.39.49 6 3.39 6 6.92 0 .9-.18 1.75-.48 2.54l.8 1.67c.67-1.25 1.01-2.65 1.01-4.21 0-4.39-3.21-8.06-7.33-8.95zM9.37 5.28C7.16 6.91 5.5 9.62 5.5 12.75c0 1.56.34 2.96 1.01 4.21l.8-1.67c-.3-.79-.48-1.64-.48-2.54 0-3.53 2.61-6.43 6-6.92V2.05c-4.12.89-7.33 4.56-7.33 8.95z"/>
+                            </svg>
+                            <h3>${emptyMessage}</h3>
+                            <p>${emptyDescription}</p>
+                        </div>
+                    `;
+                    return;
+                }
 
-                    // Calculate totals from budget data
-                    const budgetElements = document.querySelectorAll('#budgetsList .budget-item');
+                const budgetsHTML = budgets.map(budget => {
+                    const percentage = budget.percentage || 0;
+                    const progressClass = percentage > 100 ? 'danger' : percentage > 80 ? 'warning' : 'safe';
+                    
+                    return `
+                        <div class="budget-item" data-budget="${budget.limit}" data-spent="${budget.spent}">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-semibold">${budget.category}</h3>
+                                <span class="text-sm text-neutral-600">${this.formatCurrency(budget.spent)} / ${this.formatCurrency(budget.limit)}</span>
+                            </div>
+                            <div class="budget-progress">
+                                <div class="budget-progress-bar ${progressClass}" style="width: ${Math.min(percentage, 100)}%"></div>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-neutral-600">${percentage.toFixed(1)}% utilizado</span>
+                                <span class="text-neutral-600">Restante: ${this.formatCurrency(budget.remaining)}</span>
+                            </div>
+                            ${budget.alert ? `<div class="mt-2 text-sm text-error-600">⚠️ ${budget.alert}</div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+
+                container.innerHTML = budgetsHTML;
+            }
+
+            async updateBudgetSummary(budgets) {
+                try {
                     let totalBudget = 0;
                     let totalSpent = 0;
 
-                    budgetElements.forEach(element => {
-                        const budget = parseFloat(element.dataset.budget || '0');
-                        const spent = parseFloat(element.dataset.spent || '0');
-                        totalBudget += budget;
-                        totalSpent += spent;
+                    budgets.forEach(budget => {
+                        totalBudget += budget.limit || 0;
+                        totalSpent += budget.spent || 0;
                     });
 
                     const totalRemaining = totalBudget - totalSpent;
@@ -216,11 +545,49 @@
                 }
             }
 
+            // Utility methods
+            async getUserId() {
+                if (typeof window !== 'undefined' && window.getUserId) {
+                    return await window.getUserId();
+                }
+                
+                // Fallback to cookie parsing
+                const userCookie = document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('user_id='));
+                return userCookie ? userCookie.split('=')[1] : null;
+            }
+
             formatCurrency(value) {
                 return new Intl.NumberFormat('pt-BR', {
                     style: 'currency',
                     currency: 'BRL'
-                }).format(value);
+                }).format(value || 0);
+            }
+
+            showLoading(container) {
+                container.innerHTML = '<div class="loading">Carregando...</div>';
+            }
+
+            hideLoading(container) {
+                // Loading is replaced by content
+            }
+
+            showSuccess(message) {
+                if (typeof window !== 'undefined' && window.showNotification) {
+                    window.showNotification(message, 'success');
+                } else {
+                    alert(message);
+                }
+            }
+
+            showError(message) {
+                if (typeof window !== 'undefined' && window.showNotification) {
+                    window.showNotification(message, 'error');
+                } else {
+                    alert(message);
+                }
+                console.error(message);
             }
         }
 

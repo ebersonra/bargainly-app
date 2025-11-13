@@ -1,0 +1,42 @@
+<nav class="main-nav">
+  <div class="nav-container">
+    <div class="nav-brand">
+      <a href="/index.html" class="brand-link">
+        <div class="nav-logo">
+          <div class="nav-logo-text">Barganhα</div>
+          <div class="nav-logo-tagline">Smart Shopping • Better Deals</div>
+        </div>
+      </a>
+    </div>
+    
+    <button class="nav-toggle" type="button" aria-label="Toggle navigation">
+      <span class="nav-toggle-icon"></span>
+    </button>
+    
+    <div class="nav-menu">
+      <ul class="nav-links">
+        {{#each navItems}}
+        <li class="nav-item">
+          <a href="{{href}}" class="nav-link {{#if isActive}}active{{/if}} {{#if isSpecial}}nav-link-special{{/if}}">
+            {{#if icon}}
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="{{icon}}"/>
+            </svg>
+            {{/if}}
+            {{label}}
+          </a>
+        </li>
+        {{/each}}
+      </ul>
+      
+      <div class="nav-actions">
+        <button class="btn btn-secondary btn-sm nav-logout" type="button">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M16 17v-3H9v-4h7V7l5 5-5 5M14 2a2 2 0 0 1 2 2v2h-2V4H4v16h10v-2h2v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10z"/>
+          </svg>
+          Sair
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>

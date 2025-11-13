@@ -11,13 +11,14 @@ function getClient() {
 
 async function insertPurchaseRecord(record) {
   const supabase = getClient();
-  const { user_id, amount, category, source, purchase_date } = record;
+  const { user_id, amount, category, source, purchase_date, description } = record;
   const { data, error } = await supabase.rpc('insert_purchase_record', {
     p_user_id: user_id,
     p_category: category,
     p_value: amount,
     p_source: source || null,
-    p_date: purchase_date || new Date().toISOString().slice(0, 10)
+    p_date: purchase_date || new Date().toISOString().slice(0, 10),
+    p_description: description || null // Add purchase description (opcional)
   });
   if (error) throw new Error(error.message);
   return data;
@@ -60,16 +61,32 @@ async function upsertBudget(budget) {
   return { ...result, category: budget.category, limit: result?.target_value };
 }
 
-async function fetchTotalSpent(user_id) {
+async function fetchTotalSpent(user_id, options = {}) {
   const supabase = getClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from('purchase_records')
-    .select('value, purchase_categories(name)')
+    .select('value, purchase_categories(name), purchase_date')
     .eq('user_id', user_id);
+
+  // Apply date range filters if provided
+  if (options.startDate) {
+    query = query.gte('purchase_date', options.startDate);
+  }
+  if (options.endDate) {
+    query = query.lte('purchase_date', options.endDate);
+  }
+
+  // Apply category filter if provided
+  if (options.category) {
+    query = query.eq('purchase_categories.name', options.category);
+  }
+
+  const { data, error } = await query;
   if (error) throw new Error(error.message);
   return (data || []).map(r => ({
     category: r.purchase_categories?.name,
-    amount: r.value
+    amount: r.value,
+    purchase_date: r.purchase_date
   }));
 }
 
@@ -119,4 +136,48 @@ async function seedDefaultCategories(user_id) {
   return data || [];
 }
 
-module.exports = { insertPurchaseRecord, fetchBudgets, fetchTotalSpent, upsertBudget, fetchPurchaseCategories, seedDefaultCategories };
+async function fetchPurchaseRecords(params) {
+  const supabase = getClient();
+  const { user_id, limit = 10, offset = 0 } = params;
+  
+  const { data, error } = await supabase
+    .from('purchase_records')
+    .select(`
+      id,
+      value,
+      source,
+      purchase_date,
+      description,
+      created_at,
+      purchase_categories(name)
+    `)
+    .eq('user_id', user_id)
+    .order('created_at', { ascending: false })
+    .range(offset, offset + limit - 1);
+  
+  if (error) throw new Error(error.message);
+  
+  // Format the response to match frontend expectations
+  return (data || []).map(record => ({
+    id: record.id,
+    amount: record.value,
+    value: record.value, // Keep both for compatibility
+    category: record.purchase_categories?.name || 'Sem categoria',
+    market: record.source, // Use source as market for now
+    source: record.source,
+    purchase_date: record.purchase_date,
+    date: record.purchase_date, // Keep both for compatibility
+    description: record.description, // Description field from database
+    created_at: record.created_at
+  }));
+}
+
+module.exports = { 
+  insertPurchaseRecord, 
+  fetchBudgets, 
+  fetchTotalSpent, 
+  upsertBudget, 
+  fetchPurchaseCategories, 
+  seedDefaultCategories,
+  fetchPurchaseRecords
+};

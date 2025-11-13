@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
+    <!-- Navigation placeholder -->
+    <div id="nav-menu"></div>
+    
     <div class="container">
         <div class="page-header">
             <h1>Dashboard</h1>
@@ -159,12 +162,57 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/static/js/mvc/components/Navigation.js"></script>
-    <script src="/static/js/mvc/controllers/BaseController.js"></script>
-    <script src="/static/js/auth.js"></script>
-    <script src="/static/js/utils.js"></script>
-    <script src="/static/js/bargainly-app.js"></script>
-    <script src="/static/js/dashboard-app.js"></script>
+    <script>
+        // Initialize Supabase client
+        let supabaseClient = null;
+        
+        fetch('/.netlify/functions/get-env')
+          .then(res => res.json())
+          .then(env => {
+            if (env.SUPABASE_URL && env.SUPABASE_PUBLISHABLE_KEY) {
+              supabaseClient = supabase.createClient(env.SUPABASE_URL, env.SUPABASE_PUBLISHABLE_KEY);
+              window.supabase = supabaseClient;
+              
+              console.log('Supabase client initialized successfully');
+              
+              // Initialize authentication
+              initializeAuth();
+            } else {
+              console.error('Missing Supabase credentials');
+            }
+          })
+          .catch(error => {
+            console.error('Failed to load environment variables:', error);
+          });
+          
+        async function initializeAuth() {
+          // Load auth utilities first
+          await new Promise(resolve => {
+            if (window.checkAuth) {
+              resolve();
+            } else {
+              setTimeout(resolve, 1000);
+            }
+          });
+          
+          // Check authentication
+          try {
+            await window.checkAuth();
+          } catch (error) {
+            console.error('Authentication check failed:', error);
+            window.location.href = '/login.html';
+          }
+        }
+    </script>
+    <script src="/src/utils/auth.js"></script>
+    <script src="/src/utils/ui.js"></script>
+    <script src="/src/utils/formatting.js"></script>
+    <!-- Views System -->
+    <script src="/src/views/ViewEngine.js"></script>
+    <script src="/src/views/NavigationController.js"></script>
+    <script src="/src/views/ViewsInitializer.js"></script>
+    <!-- Page Controller -->
+    <script src="/src/controllers/frontend/dashboardController.js"></script>
 
 
 </body>
